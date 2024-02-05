@@ -1,6 +1,8 @@
 /* eslint-disable no-underscore-dangle */
 const asyncHandler = require("../middleware/asyncHandler")
 const User = require("../db/models/user")
+const sendOTPForVerification = require("../utils/mail")
+const emailVerificationOTPs = require("../utils/emailVerificationOtps")
 
 /*
     @desc Register user
@@ -17,6 +19,9 @@ const registerUser = asyncHandler(async (req, res) => {
 		throw new Error("User already exists")
 	}
 
+	// Send OTP for email verification
+	await sendOTPForVerification(email)
+
 	const user = await new User({
 		username,
 		email,
@@ -25,7 +30,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
 	if (user) {
 		// eslint-disable-next-line no-underscore-dangle
-		res.status(201).json({ _id: user._id, username: user.username, email: user.email })
+		res.status(201).json({
+			message: "Please verify your email. OTP has been sent to your email accont!",
+			_id: user._id,
+			username: user.username,
+			email: user.email,
+			isVerfied: false,
+		})
 	} else {
 		res.status(400)
 		throw new Error("Invalid user data")
@@ -49,7 +60,38 @@ const authUser = asyncHandler(async (req, res) => {
 	}
 })
 
+/*
+    @desc Verify user emailId
+    @route Post /api/users/verify
+    @access Public
+*/
+const verifyEmail = asyncHandler(async (req, res) => {
+	const { email, OTP } = req.body
+
+	if (emailVerificationOTPs[email] === OTP) {
+		const user = await User.findOne({ email })
+		user.isVerfied = true
+		await user.save()
+		res.json({ message: "Your email is verified." })
+	} else {
+		res.json({ message: "Invalid OTP" })
+	}
+})
+
+/*
+    @desc Resend Email verification OTP
+    @route Post /api/users/resendEmailVerificationOTP
+    @access Public
+*/
+const resendEmailVerificationOTP = asyncHandler(async (req, res) => {
+	const { email } = req.body
+	await sendOTPForVerification(email)
+	res.json({ message: "Please verify your email. OTP has been sent to your email accont!" })
+})
+
 module.exports = {
 	registerUser,
 	authUser,
+	verifyEmail,
+	resendEmailVerificationOTP,
 }
