@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 require("dotenv").config()
 const express = require("express")
+const cookieParse = require("cookie-parser")
 const routerIndex = require("./routes/routerIndex")
 const { notFound, errorHandler } = require("./middleware/errorMiddleware")
 
@@ -9,6 +11,7 @@ require("./db/connection")
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+app.use(cookieParse())
 app.use(routerIndex)
 
 app.listen(process.env.PORT, () => {

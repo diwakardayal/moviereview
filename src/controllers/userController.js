@@ -1,8 +1,16 @@
 /* eslint-disable no-underscore-dangle */
+const jwt = require("jsonwebtoken")
 const asyncHandler = require("../middleware/asyncHandler")
 const User = require("../db/models/user")
 const sendOTPForVerification = require("../utils/mail")
 const emailVerificationOTPs = require("../utils/emailVerificationOtps")
+
+const maxAge = 3 * 24 * 60 * 60
+const createToken = id => {
+	return jwt.sign({ id }, process.env.JWT_SECRET, {
+		expiresIn: maxAge,
+	})
+}
 
 /*
     @desc Register user
@@ -53,6 +61,9 @@ const authUser = asyncHandler(async (req, res) => {
 
 	const user = await User.findOne({ email })
 	if (user && (await user.matchPassword(password))) {
+		const token = createToken(email)
+		res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
+
 		res.status(200).json({ _id: user._id, username: user.username, email: user.email })
 	} else {
 		res.status(401)
@@ -72,6 +83,9 @@ const verifyEmail = asyncHandler(async (req, res) => {
 		const user = await User.findOne({ email })
 		user.isVerfied = true
 		await user.save()
+		const token = createToken(email)
+		res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
+
 		res.json({ message: "Your email is verified." })
 	} else {
 		res.json({ message: "Invalid OTP" })
