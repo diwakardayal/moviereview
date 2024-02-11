@@ -1,9 +1,17 @@
-import { Link } from "react-router-dom"
+import { useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
 
 const SignUpForm = () => {
+	const [username, setUsername] = useState()
+	const [email, setEmail] = useState()
+	const [password, setPassword] = useState()
+
+	const handleSubmit = async e => {
+		e.preventDefault()
+	}
 	return (
 		<div className="flex justify-center items-center h-100 w-full h-screen text-white bg-primary">
-			<form className="bg-secondary px-4 py-3 rounded-md">
+			<form className="bg-secondary px-4 py-3 rounded-md" onSubmit={handleSubmit}>
 				<h2 className="text-center text-xl">Sign Up</h2>
 				<div className="flex flex-col space-y-2 mt-6">
 					<label className="text-lg self-start" htmlFor="username">
