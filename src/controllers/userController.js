@@ -77,18 +77,19 @@ const authUser = asyncHandler(async (req, res) => {
     @access Public
 */
 const verifyEmail = asyncHandler(async (req, res) => {
-	const { email, OTP } = req.body
+	const { email, otp } = req.body
 
-	if (emailVerificationOTPs[email] === OTP) {
+	if (emailVerificationOTPs[email] === otp) {
 		const user = await User.findOne({ email })
 		user.isVerfied = true
 		await user.save()
 		const token = createToken(email)
 		res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
 
-		res.json({ message: "Your email is verified." })
+		res.status(200).json({ message: "Your email is verified." })
 	} else {
-		res.json({ message: "Invalid OTP" })
+		res.status(401)
+		throw new Error("Invalid OTP")
 	}
 })
 

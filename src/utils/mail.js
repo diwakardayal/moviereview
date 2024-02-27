@@ -13,7 +13,7 @@ let transport = nodemailer.createTransport({
 async function sendOTPForVerification(senderEmailId) {
 	let OTP = ""
 
-	for (let i = 0; i <= 5; i++) {
+	for (let i = 0; i < 6; i++) {
 		OTP += Math.round(Math.random(10) * 10)
 	}
 

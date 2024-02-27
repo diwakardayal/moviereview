@@ -6,7 +6,6 @@
   -moz-appearance: textfield;
 }
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
