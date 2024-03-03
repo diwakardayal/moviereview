@@ -1,39 +1,49 @@
-async function login() {}
+async function login(userInfo) {
+	const res = await fetch("/api/users/auth", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(userInfo),
+	})
+
+	if (!res.ok) {
+		throw new Error(`Failed to authenticate. ${res.status}`)
+	}
+
+	return await res.json()
+}
 
 async function registerUser(userInfo) {
-	try {
-		const res = await fetch("/api/users", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(userInfo),
-		})
+	const res = await fetch("/api/users", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(userInfo),
+	})
 
-		const data = await res.json()
-		console.log("data: ", data)
-		return true
-	} catch (e) {
-		console.log(e)
+	if (!res.ok) {
+		throw new Error(`Something went wrong: ${res.status}`)
 	}
+
+	return await res.json()
 }
 
 async function verifyEmail(userInfo) {
-	try {
-		const res = await fetch("/api/users/verifyEmail", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(userInfo),
-		})
+	const res = await fetch("/api/users/verifyEmail", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(userInfo),
+	})
 
-		const data = await res.json()
-		console.log(data)
-		return true
-	} catch (e) {
-		console.log(e)
+	if (!res.ok) {
+		throw new Error(`Something went wrong: ${res.status}`)
 	}
+
+	return await res.json()
 }
 
 export { login, registerUser, verifyEmail }

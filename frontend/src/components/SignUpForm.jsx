@@ -2,6 +2,20 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { registerUser } from "../services/auth"
 import Loader from "./Loader"
+import { useNotification } from "../hooks"
+import { useAuth } from "../hooks"
+
+function validateFormFields({ username, email, password }) {
+	const isValidEmail = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/
+
+	if (!email.trim()) return { ok: false, error: "Email is missing!" }
+	if (!isValidEmail.test(email)) return { ok: false, error: "Invalid email!" }
+	if (!username.trim()) return { ok: false, error: "Username is missing!" }
+	if (!password.trim()) return { ok: false, error: "Password is missing!" }
+	if (password.length < 5) return { ok: false, error: "Password must be 6 character long!" }
+
+	return { ok: true, error: "" }
+}
 
 const SignUpForm = () => {
 	const navigate = useNavigate()
@@ -10,56 +24,33 @@ const SignUpForm = () => {
 		email: "",
 		password: "",
 	})
+	const { updateNotification } = useNotification()
 
-	const [emailError, setEmailError] = useState(false)
-	const [nameError, SetNameSetError] = useState(false)
-	const [passwordError, setPasswordError] = useState(false)
 	const [loader, setLoader] = useState(false)
 
-	const handleSubmit = async e => {
+	const { setUserInfoHandler } = useAuth().authContextValue
+
+	async function handleSubmit(e) {
 		e.preventDefault()
-		if (!emailError && !nameError && !passwordError) {
+		const { ok, error } = validateFormFields(userInfo)
+
+		if (!ok) return updateNotification("error", error)
+
+		let registrationSuccess
+		try {
 			setLoader(true)
-			const registrationSuccess = await registerUser(userInfo)
-			console.log("registrationSuccess: ", registrationSuccess)
-			if (registrationSuccess) {
-				await new Promise(resolve => setTimeout(resolve, 500))
-				console.log("Registration Successful")
-				navigate("/verifyEmail", { state: { email: userInfo.email } })
-			}
-		}
-	}
-
-	function validateFormFields(objectKey) {
-		const { username, email, password } = objectKey
-		if (objectKey.username === "" || objectKey.username) {
-			if (!username) {
-				SetNameSetError(true)
-				return
-			}
-			setUserInfo(prevUserInfo => ({ ...prevUserInfo, username }))
-			SetNameSetError(false)
+			registrationSuccess = await registerUser(userInfo)
+		} catch (e) {
+			setLoader(false)
+			updateNotification("error", "Something went wrong")
 			return
 		}
-
-		if (objectKey.email === "" || objectKey.email) {
-			setUserInfo(prevUserInfo => ({ ...prevUserInfo, email }))
-			if (/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/.test(objectKey.email.trim())) {
-				setEmailError(false)
-				return
-			} else {
-				setEmailError(true)
-			}
-		}
-		if (objectKey.password === "" || objectKey.password) {
-			setUserInfo(prevUserInfo => ({ ...prevUserInfo, password }))
-			if (/^.{5,}$/.test(objectKey.password)) {
-				setPasswordError(false)
-				return
-			}
-
-			setPasswordError(true)
-			return
+		if (registrationSuccess) {
+			setUserInfoHandler({ email: userInfo.email, password: userInfo.password })
+			await new Promise(resolve => setTimeout(resolve, 500))
+			navigate("/verifyEmail", { state: { email: userInfo.email } })
+		} else {
+			return updateNotification("error", registrationSuccess)
 		}
 	}
 
@@ -83,15 +74,13 @@ const SignUpForm = () => {
 							</label>
 							<input
 								value={userInfo.username}
-								onChange={e => validateFormFields({ username: e.target.value })}
+								onChange={e =>
+									setUserInfo({ ...userInfo, username: e.target.value })
+								}
 								id="username"
 								className="border-2 dark:border-dark-subtle  border-gray-600 rounded p-1 dark:bg-secondary dark:text-white text-black"
 								placeholder="John Doe"
 							/>
-
-							{nameError && (
-								<p className="mt-3 text-red-700 text-sm">Please provide the name</p>
-							)}
 						</div>
 
 						<div className="flex flex-col space-y-2 mt-6">
@@ -103,16 +92,11 @@ const SignUpForm = () => {
 							</label>
 							<input
 								value={userInfo.email}
-								onChange={e => validateFormFields({ email: e.target.value })}
+								onChange={e => setUserInfo({ ...userInfo, email: e.target.value })}
 								id="email"
 								className="border-2 dark:border-dark-subtle  border-gray-600 rounded p-1 dark:bg-secondary dark:text-white text-black"
 								placeholder="example@email.com"
 							/>
-							{emailError && (
-								<p className="mt-3 text-red-700 text-sm">
-									Please provide the correct email
-								</p>
-							)}
 						</div>
 
 						<div className="flex flex-col space-y-2 mt-5">
@@ -124,15 +108,14 @@ const SignUpForm = () => {
 							</label>
 							<input
 								value={userInfo.password}
-								onChange={e => validateFormFields({ password: e.target.value })}
+								onChange={e =>
+									setUserInfo({ ...userInfo, password: e.target.value })
+								}
 								className="border-2 dark:border-dark-subtle rounded p-1 border-gray-600 dark:bg-secondary dark:text-white text-black"
 								placeholder="*************"
 								type="password"
 								id="password"
 							/>
-							{passwordError && (
-								<p className="mt-3 text-red-700 ">Please provide the password</p>
-							)}
 						</div>
 						<div className="text-center">
 							<button className="w-full rounded dark:bg-white bg-black dark:text-secondary text-white hover:bg-opacity-90 transition font-semibold text-lg cursor-pointer p-1 mt-5">

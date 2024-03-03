@@ -86,7 +86,12 @@ const verifyEmail = asyncHandler(async (req, res) => {
 		const token = createToken(email)
 		res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
 
-		res.status(200).json({ message: "Your email is verified." })
+		res.status(200).json({
+			_id: user._id,
+			username: user.username,
+			email: user.email,
+			message: "Your email is verified.",
+		})
 	} else {
 		res.status(401)
 		throw new Error("Invalid OTP")

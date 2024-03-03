@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { verifyEmail } from "../services/auth"
 import Loader from "../components/Loader"
+import { useNotification } from "../hooks/"
 
 const EmailVerfication = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
+	const { updateNotification } = useNotification()
 
 	const [loader, setLoader] = useState(false)
 	const [activeOtpIndex, setActiveOtpIndex] = useState(0)
@@ -27,7 +29,6 @@ const EmailVerfication = () => {
 		inputRef.current?.focus()
 	}, [activeOtpIndex])
 
-	console.log("OTP", otp)
 	async function handleSubmit(e) {
 		e.preventDefault()
 		if (!otp) {
@@ -35,7 +36,7 @@ const EmailVerfication = () => {
 		}
 		setLoader(true)
 		const isVerificationSuccessful = await verifyEmail({ email, otp: otp.join("") })
-
+		updateNotification(isVerificationSuccessful)
 		if (isVerificationSuccessful) {
 			navigate("/")
 		}

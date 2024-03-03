@@ -1,8 +1,11 @@
 import { BsFillSunFill } from "react-icons/bs"
 import { useTheme } from "../hooks/"
+import { useAuth } from "../hooks/"
 
 const NavBar = () => {
 	const { toggleTheme } = useTheme()
+	const { user } = useAuth().authContextValue
+
 	return (
 		<div className="bg-secondary">
 			<div className="text-white w-4/5 flex flex-col md:flex-row items-center justify-between mx-auto p-2 gap-5">
@@ -15,7 +18,7 @@ const NavBar = () => {
 						placeholder="search"
 						className="border-2 border-dark-subtle px-2 py-1 rounded-sm bg-transparent text-white"
 					/>
-					<p>Login</p>
+					<button>{user ? <span>Logout</span> : <span>Login</span>}</button>
 				</div>
 			</div>
 		</div>
