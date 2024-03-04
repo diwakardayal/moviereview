@@ -17,10 +17,10 @@ function App() {
 					<Route path="/" element={<Home />} />
 					<Route path="/login" element={<SignInForm />} />
 					<Route path="/register" element={<SignUpForm />} />
-					<Route path="/forgetPassword" element={<ForgetPassword />} />
-					<Route path="/verifyEmail" element={<EmailVerfication />} />
 					<Route path="/setNewPassword" element={<ConfirmPassword />} />
+					<Route path="/verifyEmail" element={<EmailVerfication />} />
 				</Route>
+				<Route path="/forgetPassword" element={<ForgetPassword />} />
 			</Routes>
 		</>
 	)
