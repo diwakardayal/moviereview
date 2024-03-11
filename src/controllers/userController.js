@@ -40,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
 		// eslint-disable-next-line no-underscore-dangle
 		res.status(201).json({
 			message: "Please verify your email. OTP has been sent to your email accont!",
-			_id: user._id,
+			id: user._id,
 			username: user.username,
 			email: user.email,
 			isVerfied: false,
@@ -61,10 +61,15 @@ const authUser = asyncHandler(async (req, res) => {
 
 	const user = await User.findOne({ email })
 	if (user && (await user.matchPassword(password))) {
-		const token = createToken(email)
+		const token = createToken(user._id)
 		res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
-
-		res.status(200).json({ _id: user._id, username: user.username, email: user.email })
+		res.status(200).json({
+			user: {
+				id: user._id,
+				name: user.name,
+				email: user.email,
+			},
+		})
 	} else {
 		res.status(401)
 		throw new Error("Invalid email or password")

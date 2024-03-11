@@ -10,14 +10,15 @@ const {
 const { uploadImage } = require("../middleware/multer")
 const { requireAuth, admin } = require("../middleware/auth")
 
-const Router = express.Router()
+const router = express.Router()
 
-Router.route("/")
+router
+	.route("/")
 	.get(getActors)
 	.post(requireAuth, admin, uploadImage.single("avatar"), createActor)
 	.put(requireAuth, admin, uploadImage.single("avatar"), updateActor)
 	.delete(requireAuth, admin, deleteActor)
-Router.route("/:actorName").get(getActorByName)
-Router.route("/:actorId").get(getActorById)
+router.route("/:actorName").get(getActorByName)
+router.route("/:actorId").get(getActorById)
 
-module.exports = Router
+module.exports = router

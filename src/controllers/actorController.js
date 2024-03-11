@@ -1,16 +1,10 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable camelcase */
-const cloudinary = require("cloudinary").v2
 const { isValidObjectId } = require("mongoose")
+const cloudinary = require("../db/cloud")
 const asyncHandler = require("../middleware/asyncHandler")
 const Actor = require("../db/models/actor")
-
-cloudinary.config({
-	cloud_name: process.env.CLOUD_API_NAME,
-	api_key: process.env.CLOUD_API_KEY,
-	api_secret: process.env.CLOUD_API_SECRET,
-})
 
 // @desc get actor
 // @route GET /api/actor/:actorName
