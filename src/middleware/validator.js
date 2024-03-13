@@ -5,7 +5,7 @@ const { check, validationResult } = require("express-validator")
 const { isValidObjectId } = require("mongoose")
 const genres = require("../db/genres")
 
-exports.validate = (req, res, next) => {
+const validate = (req, res, next) => {
 	const error = validationResult(req).array()
 	if (error.length) {
 		res.status(400)
@@ -15,11 +15,11 @@ exports.validate = (req, res, next) => {
 	next()
 }
 
-exports.validateMovie = [
+const validateMovie = [
 	check("title").trim().not().isEmpty().withMessage("Movie title is missing!"),
 	check("storyLine").trim().not().isEmpty().withMessage("Storyline is missing!"),
 	check("language").trim().not().isEmpty().withMessage("Language is missing!"),
-	check("releseDate").isDate().withMessage("Relese date is missing!"),
+	check("releaseDate").withMessage("release date is missing!"),
 	check("status")
 		.isIn(["public", "private"])
 		.withMessage("Movie status must be public or private!"),
@@ -44,7 +44,7 @@ exports.validateMovie = [
 
 			return true
 		}),
-	check("cast")
+	check("casts")
 		.isArray()
 		.withMessage("Cast must be an array of objects!")
 		.custom(cast => {
@@ -71,13 +71,16 @@ exports.validateMovie = [
 				if (public_id !== publicId) throw Error("Trailer public_id is invalid!")
 
 				return true
-			} catch (error) {
+			} catch (e) {
+				console.log(e)
 				throw Error("Trailer url is invalid!")
 			}
 		}),
-	check("poster").custom((_, { req }) => {
-		if (!req.file) throw Error("Poster file is missing!")
+	// check("poster").custom((_, { req }) => {
+	// 	if (!req.file) throw Error("Poster file is missing!")
 
-		return true
-	}),
+	// 	return true
+	// }),
 ]
+
+module.exports = { validate, validateMovie }

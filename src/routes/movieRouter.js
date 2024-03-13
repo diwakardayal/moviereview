@@ -1,6 +1,10 @@
 const express = require("express")
 const { requireAuth, admin } = require("../middleware/auth")
-const { uploadTrailer, createMovie } = require("../controllers/movieController")
+const {
+	uploadTrailer,
+	createMovie,
+	updateMovieWithoutPoster,
+} = require("../controllers/movieController")
 const { uploadVideo, uploadImage } = require("../middleware/multer")
 const { parseData } = require("../utils/helper")
 const { validate, validateMovie } = require("../middleware/validator")
@@ -19,5 +23,9 @@ router
 		validate,
 		createMovie,
 	)
+
+router
+	.route("/update/:movieId")
+	.patch(requireAuth, admin, parseData, validateMovie, validate, updateMovieWithoutPoster)
 
 module.exports = router

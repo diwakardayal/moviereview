@@ -125,4 +125,69 @@ const createMovie = asyncHandler(async (req, res) => {
 	})
 })
 
-module.exports = { uploadTrailer, createMovie }
+const updateMovieWithoutPoster = asyncHandler(async (req, res) => {
+	const { movieId } = req.params
+
+	if (!isValidObjectId(movieId)) {
+		res.status(400)
+		throw Error("Invalid Movie Id!")
+	}
+
+	const movie = await Movie.findById(movieId)
+
+	if (!movie) {
+		res.status(400)
+		throw Error("Movie doesnt exist")
+	}
+
+	const {
+		title,
+		storyLine,
+		director,
+		releaseDate,
+		status,
+		type,
+		genres,
+		tags,
+		casts,
+		writers,
+		trailer,
+		language,
+	} = req.body
+
+	movie.title = title
+	movie.storyLine = storyLine
+	movie.tags = tags
+	movie.releaseDate = releaseDate
+	movie.status = status
+	movie.type = type
+	movie.casts = JSON.parse(JSON.stringify(casts))
+	movie.genres = genres
+	movie.trailer = trailer
+	movie.language = language
+
+	if (director) {
+		if (!isValidObjectId(director)) {
+			res.status(400)
+			throw Error("Invalid director id!")
+		}
+		movie.director = director
+	}
+
+	if (writers) {
+		for (const id of writers) {
+			if (!isValidObjectId(id)) {
+				res.status(400)
+				throw Error("Invalid writer id!")
+			}
+		}
+
+		movie.writers = writers
+	}
+
+	await movie.save()
+
+	res.status(200).json({ message: "Movie is updated", movie })
+})
+
+module.exports = { uploadTrailer, createMovie, updateMovieWithoutPoster }
