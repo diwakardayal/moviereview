@@ -4,6 +4,8 @@ const {
 	uploadTrailer,
 	createMovie,
 	updateMovieWithoutPoster,
+	removeMovie,
+	updateMovieWithPoster,
 } = require("../controllers/movieController")
 const { uploadVideo, uploadImage } = require("../middleware/multer")
 const { parseData } = require("../utils/helper")
@@ -27,5 +29,19 @@ router
 router
 	.route("/update/:movieId")
 	.patch(requireAuth, admin, parseData, validateMovie, validate, updateMovieWithoutPoster)
+
+router
+	.route("/update-with-poster/:movieId")
+	.patch(
+		requireAuth,
+		admin,
+		uploadImage.single("poster"),
+		parseData,
+		validateMovie[validateMovie.length - 1],
+		validate,
+		updateMovieWithPoster,
+	)
+
+router.delete("/:movieId", requireAuth, admin, removeMovie)
 
 module.exports = router
