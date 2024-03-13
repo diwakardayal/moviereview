@@ -8,7 +8,7 @@ const movieSchema = mongoose.Schema(
 			trim: true,
 			required: true,
 		},
-		storeLine: {
+		storyLine: {
 			type: String,
 			trim: true,
 			required: true,
@@ -32,6 +32,7 @@ const movieSchema = mongoose.Schema(
 		},
 		genres: {
 			type: [String],
+			required: true,
 			enums: genres,
 		},
 		tags: {
@@ -63,7 +64,7 @@ const movieSchema = mongoose.Schema(
 			public_id: { type: String, required: true },
 			required: true,
 		},
-		reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Reviews" }],
+		reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
 		language: {
 			type: String,
 			required: true,
