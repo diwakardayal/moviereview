@@ -19,7 +19,7 @@ const validateMovie = [
 	check("title").trim().not().isEmpty().withMessage("Movie title is missing!"),
 	check("storyLine").trim().not().isEmpty().withMessage("Storyline is missing!"),
 	check("language").trim().not().isEmpty().withMessage("Language is missing!"),
-	check("releaseDate").withMessage("release date is missing!"),
+	check("releaseDate").isEmpty().withMessage("release date is missing!"),
 	check("status")
 		.isIn(["public", "private"])
 		.withMessage("Movie status must be public or private!"),
