@@ -64,11 +64,10 @@ const authUser = asyncHandler(async (req, res) => {
 		const token = createToken(user._id)
 		res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 })
 		res.status(200).json({
-			user: {
-				id: user._id,
-				name: user.name,
-				email: user.email,
-			},
+			id: user._id,
+			name: user.name,
+			email: user.email,
+			isAdmin: user.isAdmin,
 		})
 	} else {
 		res.status(401)
@@ -96,6 +95,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 			username: user.username,
 			email: user.email,
 			message: "Your email is verified.",
+			isAdmin: user.isAdmin,
 		})
 	} else {
 		res.status(401)

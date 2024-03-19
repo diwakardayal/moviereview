@@ -1,20 +1,17 @@
 /* eslint-disable react/prop-types */
 import { createContext, useState } from "react"
-import { login } from "../services/auth"
 import { useNavigate } from "react-router-dom"
 
 export const AuthContext = createContext()
 
 export default function AuthProvider({ children }) {
-	const [user, setUser] = useState(window.localStorage.getItem("user") || null)
+	const [user, setUser] = useState(JSON.parse(window.localStorage.getItem("user")) || null)
 	const navigate = useNavigate()
 
 	async function setUserInfoHandler(userInfo) {
-		if (userInfo) {
-			setUser(userInfo)
-			window.localStorage.setItem("user", JSON.stringify(userInfo))
-			return
-		}
+		setUser(userInfo)
+		window.localStorage.setItem("user", JSON.stringify(userInfo))
+		return
 	}
 
 	function handleLogout() {

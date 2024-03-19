@@ -4,10 +4,10 @@ import { AiOutlineHome } from "react-icons/ai"
 import { BiMoviePlay } from "react-icons/bi"
 import { FaUserNinja } from "react-icons/fa"
 import { FiLogOut } from "react-icons/fi"
-import { AuthContext } from "../context/AuthProvider"
+import { useAuth } from "../hooks/index"
 
 const NavBar = () => {
-	const { handleLogout } = AuthContext()
+	const { handleLogout } = useAuth()
 	return (
 		<nav className="w-48 min-h-screen bg-secondary border-r border-gray-300 flex flex-col justify-between">
 			<ul className="pl-5 sticky top-0">
