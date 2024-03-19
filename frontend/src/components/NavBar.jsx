@@ -1,10 +1,11 @@
 import { BsFillSunFill } from "react-icons/bs"
 import { useTheme } from "../hooks/"
 import { useAuth } from "../hooks/"
+import { Link } from "react-router-dom"
 
 const NavBar = () => {
 	const { toggleTheme } = useTheme()
-	const { user } = useAuth().authContextValue
+	const { user, handleLogout } = useAuth()
 
 	return (
 		<div className="bg-secondary">
@@ -18,7 +19,11 @@ const NavBar = () => {
 						placeholder="search"
 						className="border-2 border-dark-subtle px-2 py-1 rounded-sm bg-transparent text-white"
 					/>
-					<button>{user ? <span>Logout</span> : <span>Login</span>}</button>
+					{user ? (
+						<button onClick={handleLogout}>Logout</button>
+					) : (
+						<Link to="/login">Login</Link>
+					)}
 				</div>
 			</div>
 		</div>

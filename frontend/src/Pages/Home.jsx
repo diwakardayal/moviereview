@@ -1,5 +1,3 @@
-const Home = () => {
-	return <>Home</>
+export default function Home() {
+	return <>HOME</>
 }
-
-export default Home

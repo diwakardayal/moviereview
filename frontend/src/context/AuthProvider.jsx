@@ -1,15 +1,15 @@
 /* eslint-disable react/prop-types */
 import { createContext, useState } from "react"
 import { login } from "../services/auth"
+import { useNavigate } from "react-router-dom"
 
 export const AuthContext = createContext()
 
 export default function AuthProvider({ children }) {
 	const [user, setUser] = useState(window.localStorage.getItem("user") || null)
+	const navigate = useNavigate()
 
-	async function setUserInfoHandler({ email, password }) {
-		const userInfo = await login({ email, password })
-
+	async function setUserInfoHandler(userInfo) {
 		if (userInfo) {
 			setUser(userInfo)
 			window.localStorage.setItem("user", JSON.stringify(userInfo))
@@ -17,10 +17,15 @@ export default function AuthProvider({ children }) {
 		}
 	}
 
-	const authContextValue = {
-		user,
-		setUserInfoHandler,
+	function handleLogout() {
+		localStorage.removeItem("user")
+		navigate("/")
+		setUser(null)
 	}
 
-	return <AuthContext.Provider value={{ authContextValue }}>{children}</AuthContext.Provider>
+	return (
+		<AuthContext.Provider value={{ user, setUserInfoHandler, handleLogout }}>
+			{children}
+		</AuthContext.Provider>
+	)
 }

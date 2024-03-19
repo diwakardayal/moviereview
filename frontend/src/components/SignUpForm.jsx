@@ -28,7 +28,7 @@ const SignUpForm = () => {
 
 	const [loader, setLoader] = useState(false)
 
-	const { setUserInfoHandler } = useAuth().authContextValue
+	const { setUserInfoHandler } = useAuth()
 
 	async function handleSubmit(e) {
 		e.preventDefault()

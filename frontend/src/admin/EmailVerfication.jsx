@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { verifyEmail } from "../services/auth"
 import Loader from "../components/Loader"
-import { useNotification } from "../hooks/"
+import { useNotification } from "../hooks"
 
 const EmailVerfication = () => {
 	const navigate = useNavigate()

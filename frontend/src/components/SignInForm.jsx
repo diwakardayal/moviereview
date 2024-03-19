@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import Loader from "./Loader"
 import { login } from "../services/auth"
-import { useNotification } from "../hooks"
+import { useAuth, useNotification } from "../hooks"
 
 function validateFormFields({ email, password }) {
 	const isValidEmail = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/
@@ -18,6 +18,7 @@ function validateFormFields({ email, password }) {
 
 const SignInForm = () => {
 	const [loader, setLoader] = useState(false)
+	const { setUserInfoHandler } = useAuth()
 
 	const [userInfo, setUserInfo] = useState({
 		email: "",
@@ -36,7 +37,9 @@ const SignInForm = () => {
 		if (!ok) return updateNotification("error", error)
 
 		try {
-			await login(userInfo)
+			const res = await login(userInfo)
+			console.log("res: ", res)
+			setUserInfoHandler(res)
 			setLoader(true)
 			setLoader(false)
 			navigate("/")
