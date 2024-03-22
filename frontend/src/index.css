@@ -10,6 +10,27 @@
 	animation: bounce-custom 0.5s;
 }
 
+.animate-show-in{
+	transform-origin: 0% 0%;
+	animation: scale 0.2s;
+}
+
+.animate-show-out{
+	transform-origin: 0% 0%;
+	animation: scale 0.2s reverse forwards;
+}
+
+@keyframes scale {
+	0%{
+		transform: scaleY(0);
+	}
+	100%{
+		transform: scaleY(1);
+	}
+}
+
+
+
 @keyframes bounce-custom {
 	from,
 	to {
