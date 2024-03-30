@@ -10,24 +10,34 @@ const Movie = require("../db/models/movie")
 // @route POST /api/movie/trailer
 // @access Private
 const uploadTrailer = asyncHandler(async (req, res) => {
-	const { file } = req
-	if (!file) {
-		res.status(400)
-		throw Error("Video file is missing")
+	try {
+		const { file } = req
+		console.log("file: ", file)
+		if (!file) {
+			res.status(400)
+			throw Error("Video file is missing")
+		}
+
+		const videoRes = await cloudinary.uploader.upload(file.path, {
+			resource_type: "video",
+		})
+
+		console.log(videoRes)
+
+		if (!videoRes) {
+			res.status(500)
+			throw Error("Fail to upload the file")
+		}
+
+		const { secure_url: url, public_id } = videoRes
+
+		res.status(201).json({ url, public_id })
+		// res.json({ message: "HI" })
+
+		// res.status(201).json({ message: "resources has been created" })
+	} catch (error) {
+		console.log(error)
 	}
-
-	const videoRes = await cloudinary.uploader.upload(file.path, {
-		resource_type: "video",
-	})
-
-	if (!videoRes) {
-		res.status(500)
-		throw Error("Fail to upload the file")
-	}
-
-	const { secure_url: url, public_id } = videoRes
-
-	res.status(201).json({ url, public_id })
 })
 
 // @desc Post movie

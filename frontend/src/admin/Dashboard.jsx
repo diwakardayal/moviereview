@@ -1,3 +1,5 @@
+import UploadMovie from "./UploadMovie"
+
 export default function Dashboard() {
-	return <>Dashboard</>
+	return <UploadMovie />
 }

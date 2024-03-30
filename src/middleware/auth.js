@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken")
 const User = require("../db/models/user")
+const asyncHandler = require("./asyncHandler")
 
-const requireAuth = async (req, res, next) => {
+const requireAuth = asyncHandler(async (req, res, next) => {
 	try {
 		const token = req.cookies.jwt
 
@@ -20,15 +21,15 @@ const requireAuth = async (req, res, next) => {
 		res.status(401)
 		throw Error("Unauthenticated request")
 	}
-}
+})
 
-const admin = (req, res, next) => {
+const admin = asyncHandler((req, res, next) => {
 	if (req.user && req.user.isAdmin) {
 		next()
 	} else {
 		res.status(401)
 		throw Error("Not authorized as admin")
 	}
-}
+})
 
 module.exports = { requireAuth, admin }
