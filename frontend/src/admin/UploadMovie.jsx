@@ -1,11 +1,14 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { FileUploader } from "react-drag-drop-files"
 import { uploadMovie } from "../services/movie"
 import { useNotification } from "../hooks"
 import { AiOutlineCloudUpload } from "react-icons/ai"
 import { useState } from "react"
+import MovieForm from "./MovieForm"
+import ModalComponent from "../components/modal/ModalContainer"
 
-export default function UploadMovie() {
+export default function UploadMovie({ isMovieFormVisible, onClose }) {
 	const [isVideoSelected, setIsVideoSelected] = useState(false)
 	const [isVideoUploaded, setIsVideoUploaded] = useState(false)
 	const [uploadProgress, setUploadProgress] = useState(0)
@@ -57,20 +60,19 @@ export default function UploadMovie() {
 	}
 
 	return (
-		<div className="fixed inset-0 dark:bg-white dark:bg-opacity-50 bg-primary bg-opacity-50 backdrop-blur-sm flex justify-center items-center">
-			<div className="dark:bg-primary bg-white rounded w-[45rem] h-[40rem] ">
-				<UploadProgress
+		<ModalComponent isModalVisible={isMovieFormVisible} onClose={onClose}>
+			{/* <UploadProgress
 					visible={isVideoSelected && !isVideoUploaded}
 					message={getUploadProgressValue()}
 					width={uploadProgress}
-				/>
-				<TrailerComponent
+					/>
+					<TrailerComponent
 					visible={!isVideoSelected}
 					handleChange={handleChange}
 					handleTypeError={handleTypeError}
-				/>
-			</div>
-		</div>
+				/> */}
+			<MovieForm />
+		</ModalComponent>
 	)
 }
 
