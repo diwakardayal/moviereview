@@ -242,7 +242,7 @@ export default function MovieForm() {
 					</button>
 				</div>
 				<div className="w-[30%] space-y-5">
-					<SelectPoster name="poster" onChange={handleChange} selectedPoster={poster} />
+					<SelectPoster name="poster" onChange={handleChange} selectedPoster={poster} label="Select Poster" />
 
 					<SelectGenres onClick={() => setIsGenresModalVisible(true)} />
 					<Selector

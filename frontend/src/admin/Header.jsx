@@ -4,7 +4,7 @@ import { AiOutlinePlus } from "react-icons/ai"
 import { BsFillSunFill } from "react-icons/bs"
 import { useTheme } from "../hooks"
 
-export default function Header({ onAddMovieClick }) {
+export default function Header({ onAddActorClick, onAddMovieClick }) {
 	const [show, setShow] = useState(false)
 	const { toggleTheme } = useTheme()
 
@@ -32,13 +32,14 @@ export default function Header({ onAddMovieClick }) {
 					isVisible={show}
 					onClose={() => setShow(false)}
 					onAddMovieClick={onAddMovieClick}
+					onAddActorClick={onAddActorClick}
 				/>
 			</div>
 		</div>
 	)
 }
 
-const CreateOptions = ({ isVisible, onClose, onAddMovieClick }) => {
+const CreateOptions = ({ isVisible, onClose, onAddMovieClick, onAddActorClick }) => {
 	const container = useRef()
 	const containerID = "options-container"
 
@@ -47,7 +48,7 @@ const CreateOptions = ({ isVisible, onClose, onAddMovieClick }) => {
 			if (!isVisible) return
 			const { parentElement, id } = e.target
 
-			if (parentElement.id === containerID || id === containerID) return
+			if (parentElement?.id === containerID || id === containerID) return
 
 			if (container.current) {
 				if (!container.current.classList.contains("animate-show-in"))
@@ -74,7 +75,7 @@ const CreateOptions = ({ isVisible, onClose, onAddMovieClick }) => {
 			}}
 		>
 			<Option onClick={onAddMovieClick}>Add Movie</Option>
-			<Option>Add Actor</Option>
+			<Option onClick={onAddActorClick}>Add Actor</Option>
 		</div>
 	)
 }

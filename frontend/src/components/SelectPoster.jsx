@@ -2,7 +2,7 @@
 const commonPosterUI =
 	"flex justify-center items-center border border-dashed rounded aspect-video dark:border-dark-subtle border-light-subtle cursor-pointer"
 
-export default function SelectPoster({ name, selectedPoster, onChange }) {
+export default function SelectPoster({ name, selectedPoster, onChange, className, label }) {
 	return (
 		<div>
 			<input
@@ -15,19 +15,23 @@ export default function SelectPoster({ name, selectedPoster, onChange }) {
 			/>
 			<label htmlFor={name}>
 				{selectedPoster ? (
-					<img className={commonPosterUI + " object-cover"} src={selectedPoster} alt="" />
+					<img
+						className={commonPosterUI + " object-cover " + className}
+						src={selectedPoster}
+						alt=""
+					/>
 				) : (
-					<PosterUI />
+					<PosterUI className={className} label={label} />
 				)}
 			</label>
 		</div>
 	)
 }
 
-function PosterUI() {
+function PosterUI({ className, label }) {
 	return (
-		<div className={commonPosterUI}>
-			<span className="dark:text-dark-subtle text-light-subtle">Select Poster</span>
+		<div className={commonPosterUI + " " + className}>
+			<span className="dark:text-dark-subtle text-light-subtle">{label}</span>
 		</div>
 	)
 }

@@ -8,15 +8,20 @@ import Dashboard from "../admin/Dashboard"
 import Header from "../admin/Header"
 import UploadMovie from "../admin/UploadMovie"
 import { useState } from "react"
+import UploadActor from "../admin/UploadActor"
 
 export default function AdminNavigator() {
 	const [isMovieFormVisible, SetIsMovieFormVisible] = useState(false)
+	const [isActorFormVisible, setIsActorFormVisible] = useState(false)
 	return (
 		<>
 			<div className="flex dark:bg-primary bg-white">
 				<NavBar />
 				<div className="flex-1 p-2 max-w-screen-xl">
-					<Header onAddMovieClick={() => SetIsMovieFormVisible(true)} />
+					<Header
+						onAddMovieClick={() => SetIsMovieFormVisible(true)}
+						onAddActorClick={() => setIsActorFormVisible(true)}
+					/>
 					<Routes>
 						<Route path="/" element={<Dashboard />} />
 						<Route path="/movies" element={<MoviesPage />} />
@@ -27,7 +32,11 @@ export default function AdminNavigator() {
 			</div>
 			<UploadMovie
 				isMovieFormVisible={isMovieFormVisible}
-				onClose={() => SetIsMovieFormVisible(value => !value)}
+				onClose={() => SetIsMovieFormVisible(false)}
+			/>
+			<UploadActor
+				isModalVisible={isActorFormVisible}
+				onClose={() => setIsActorFormVisible(false)}
 			/>
 		</>
 	)

@@ -8,7 +8,7 @@ export default function Selector({ name, options = [], value, label, onChange })
 			value={value}
 			onChange={onChange}
 		>
-			<option value={value}>{label}</option>
+			<option value="">{label}</option>
 			{options.map(({ title, value }) => (
 				<option key={title} value={value}>
 					{title}
