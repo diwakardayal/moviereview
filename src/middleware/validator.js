@@ -19,7 +19,7 @@ const validateMovie = [
 	check("title").trim().not().isEmpty().withMessage("Movie title is missing!"),
 	check("storyLine").trim().not().isEmpty().withMessage("Storyline is missing!"),
 	check("language").trim().not().isEmpty().withMessage("Language is missing!"),
-	check("releaseDate").isEmpty().withMessage("release date is missing!"),
+	// check("releaseDate").isEmpty().withMessage("release date is missing!"),
 	check("status")
 		.isIn(["public", "private"])
 		.withMessage("Movie status must be public or private!"),
@@ -44,12 +44,12 @@ const validateMovie = [
 
 			return true
 		}),
-	check("casts")
+	check("actors")
 		.isArray()
 		.withMessage("Cast must be an array of objects!")
 		.custom(cast => {
 			for (let c of cast) {
-				if (!isValidObjectId(c.actor)) throw Error("Invalid cast id inside cast!")
+				if (!isValidObjectId(c.id)) throw Error("Invalid cast id inside cast!")
 				if (!c.roleAs?.trim()) throw Error("Role as is missing inside cast!")
 				if (typeof c.leadActor !== "boolean")
 					throw Error("Only accepted boolean value inside leadActor inside cast!")
@@ -76,11 +76,11 @@ const validateMovie = [
 				throw Error("Trailer url is invalid!")
 			}
 		}),
-	check("poster").custom((_, { req }) => {
-		if (!req.file) throw Error("Poster file is missing!")
+	// check("poster").custom((_, { req }) => {
+	// 	if (!req.file) throw Error("Poster file is missing!")
 
-		return true
-	}),
+	// 	return true
+	// }),
 ]
 
 module.exports = { validate, validateMovie }

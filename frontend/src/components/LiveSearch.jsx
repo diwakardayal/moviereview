@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, forwardRef } from "react"
 import { commonInputClasses } from "../utils/theme"
 
 export default function LiveSearch({
+	name,
 	value = "",
 	placeholder = "",
 	results = [],
@@ -13,6 +14,7 @@ export default function LiveSearch({
 	renderItem = null,
 	onChange = null,
 	onSelect = null,
+	isModalVisible,
 }) {
 	const [isSearchDisplayed, setIsSearchDisplayed] = useState(false)
 	const [focusedIndex, setFocusedIndex] = useState(-1)
@@ -36,6 +38,7 @@ export default function LiveSearch({
 			return
 		}
 		onSelect(selectedItem)
+		setDefaultValue("")
 		closeSearch()
 	}
 
@@ -71,8 +74,13 @@ export default function LiveSearch({
 	}
 
 	useEffect(() => {
-		if (value) setDefaultValue(value)
+		setDefaultValue(value)
 	}, [value])
+
+	useEffect(() => {
+		if (isModalVisible) return setIsSearchDisplayed(isModalVisible)
+		setIsSearchDisplayed(false)
+	}, [isModalVisible])
 
 	return (
 		<div
@@ -82,12 +90,15 @@ export default function LiveSearch({
 			className="relative outline-none"
 		>
 			<input
+				name={name}
 				type="text"
+				id={name}
 				className={getInputStyle()}
 				placeholder={placeholder}
 				onFocus={handleOnFocus}
 				onChange={handleChange}
 				value={defaultValue}
+				autoComplete="off"
 			/>
 			<SearchResults
 				results={results}

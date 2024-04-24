@@ -66,7 +66,7 @@ export default function TagsInput({ name, onChange }) {
 					name={name}
 					ref={input}
 					type="text"
-					className="h-full flex-grow bg-transparent outline-none dark:text-white"
+					className="h-full flex-grow bg-transparent outline-none dark:text-white text-black"
 					placeholder="Tag one, Tag two"
 					value={tag}
 					onChange={handleOnChange}

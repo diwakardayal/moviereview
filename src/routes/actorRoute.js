@@ -18,7 +18,7 @@ router
 	.post(requireAuth, admin, uploadImage.single("avatar"), createActor)
 	.put(requireAuth, admin, uploadImage.single("avatar"), updateActor)
 	.delete(requireAuth, admin, deleteActor)
-router.route("/:actorName").get(getActorByName)
-router.route("/:actorId").get(getActorById)
+router.route("/actorName/:actorName").get(getActorByName)
+router.route("/actorId/:actorId").get(getActorById)
 
 module.exports = router

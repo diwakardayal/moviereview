@@ -29,7 +29,6 @@ export default function GenresModal({
 		onClose()
 	}
 
-	console.log(selectedGenres)
 	return (
 		<ModalComponent isModalVisible={isModalVisible} onClose={onClose}>
 			<div className="flex flex-col justify-between h-full">

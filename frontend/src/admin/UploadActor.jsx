@@ -1,17 +1,17 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react"
-import ActorForm from "../components/ActorForm"
+import CastTypeForm from "../components/CastTypeForm"
 import ModalComponent from "../components/modal/ModalContainer"
 import { useNotification } from "../hooks"
-import { createActor } from "../services/actor"
+import { createCast } from "../services/cast"
 
-export default function UploadActor({ isModalVisible, onClose }) {
+export default function UploadCast({ isModalVisible, onClose }) {
 	const [busy, setBusy] = useState(false)
 	const { updateNotification } = useNotification()
 
 	async function handleSubmit(data) {
 		setBusy(true)
-		const { error } = await createActor(data)
+		const { error } = await createCast(data)
 		setBusy(false)
 		if (error) return updateNotification("error", error)
 		updateNotification("success", "Actor created successfully")
@@ -20,8 +20,8 @@ export default function UploadActor({ isModalVisible, onClose }) {
 
 	return (
 		<ModalComponent isModalVisible={isModalVisible} onClose={onClose} ignoreContainer>
-			<ActorForm
-				title="Create New Actor"
+			<CastTypeForm
+				title="Create New"
 				btnTitle="Create"
 				onSubmit={!busy ? handleSubmit : null}
 			/>

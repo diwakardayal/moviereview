@@ -55,13 +55,11 @@ const createMovie = asyncHandler(async (req, res) => {
 		type,
 		genres,
 		tags,
-		casts,
 		writers,
 		trailer,
 		language,
+		actors,
 	} = body
-
-	let jsonParsedCasts = JSON.parse(JSON.stringify(casts))
 
 	const newMovie = new Movie({
 		title,
@@ -71,28 +69,18 @@ const createMovie = asyncHandler(async (req, res) => {
 		type,
 		genres,
 		tags,
-		jsonParsedCasts,
+		actors,
 		trailer,
 		language,
 	})
 
 	if (director) {
-		if (!isValidObjectId(director)) {
-			res.status(400)
-			throw Error("Invalid director id!")
-		}
-		newMovie.director = director
+		newMovie.director = director._id
 	}
 
 	if (writers) {
-		for (const id of writers) {
-			if (!isValidObjectId(id)) {
-				res.status(400)
-				throw Error("Invalid writer id!")
-			}
-		}
-
-		newMovie.writers = writers
+		const writersId = writers.map(w => w._id)
+		newMovie.writers = writersId
 	}
 
 	// uploading poster
@@ -159,7 +147,7 @@ const updateMovieWithoutPoster = asyncHandler(async (req, res) => {
 		type,
 		genres,
 		tags,
-		casts,
+		actors,
 		writers,
 		trailer,
 		language,
@@ -171,7 +159,7 @@ const updateMovieWithoutPoster = asyncHandler(async (req, res) => {
 	movie.releaseDate = releaseDate
 	movie.status = status
 	movie.type = type
-	movie.casts = JSON.parse(JSON.stringify(casts))
+	movie.actors = JSON.parse(JSON.stringify(actors))
 	movie.genres = genres
 	movie.trailer = trailer
 	movie.language = language
@@ -224,7 +212,7 @@ const updateMovieWithPoster = asyncHandler(async (req, res) => {
 		type,
 		genres,
 		tags,
-		casts,
+		actors,
 		writers,
 		trailer,
 		language,
@@ -236,7 +224,7 @@ const updateMovieWithPoster = asyncHandler(async (req, res) => {
 	movie.releaseDate = releaseDate
 	movie.status = status
 	movie.type = type
-	movie.casts = JSON.parse(JSON.stringify(casts))
+	movie.actors = JSON.parse(JSON.stringify(actors))
 	movie.genres = genres
 	movie.trailer = trailer
 	movie.language = language

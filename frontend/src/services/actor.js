@@ -13,4 +13,13 @@ async function createActor(userInfo) {
 	}
 }
 
-export { createActor }
+async function searchActor(actorName) {
+	try {
+		const res = await axios.get(`/api/actor/actorName/${actorName}`)
+		return res?.data
+	} catch (e) {
+		return { error: e }
+	}
+}
+
+export { createActor, searchActor }

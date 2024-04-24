@@ -1,9 +1,9 @@
 /* eslint-disable react/prop-types */
-
+import { useEffect } from "react"
 import TagsInput from "../components/TagsInput"
 import LiveSearch from "../components/LiveSearch"
 import { useState } from "react"
-import { useNotification } from "../hooks/index"
+import { useNotification, useSearch } from "../hooks/index"
 import WritersModal from "../components/modal/WritersModal"
 import CastForm from "../components/CastForm"
 import { commonInputClasses } from "../utils/theme"
@@ -13,43 +13,13 @@ import SelectGenres from "../components/SelectGenres"
 import GenresModal from "../components/modal/GenresModal"
 import Selector from "../components/Selector"
 import { typeOptions, statusOptions, languageOptions } from "../utils/options"
-
-export const results = [
-	{
-		id: "1",
-		avatar: "https://images.unsplash.com/photo-1643713303351-01f540054fd7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",
-		name: "John Doe",
-	},
-	{
-		id: "2",
-		avatar: "https://images.unsplash.com/photo-1643883135036-98ec2d9e50a1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",
-		name: "Chandri Anggara",
-	},
-	{
-		id: "3",
-		avatar: "https://images.unsplash.com/photo-1578342976795-062a1b744f37?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",
-		name: "Amin RK",
-	},
-	{
-		id: "4",
-		avatar: "https://images.unsplash.com/photo-1564227901-6b1d20bebe9d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",
-		name: "Edward Howell",
-	},
-	{
-		id: "5",
-		avatar: "https://images.unsplash.com/photo-1578342976795-062a1b744f37?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",
-		name: "Amin RK",
-	},
-	{
-		id: "6",
-		avatar: "https://images.unsplash.com/photo-1564227901-6b1d20bebe9d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80",
-		name: "Edward Howell",
-	},
-]
+import { uploadMovie } from "../services/movie"
+import { searchDirector } from "../services/director"
+import { searchWriter } from "../services/writer"
 
 export function renderItem(result) {
 	return (
-		<div className="flex rounded overflow-hidden">
+		<div className="flex rounded overflow-hidden gap-2">
 			<img src={result.avatar} alt="" className="w-16 h-16 object-cover" />
 			<p className="dark:text-white font-semibold">{result.name}</p>
 		</div>
@@ -60,39 +30,108 @@ const defaultMovieInfo = {
 	title: "",
 	storyLine: "",
 	tags: [],
-	cast: [],
+	actors: [],
 	director: {},
 	writers: [],
 	releaseDate: "",
 	poster: null,
 	genres: [],
+	type: "",
 	language: "",
 	status: "",
+	trailer: {
+		url: "",
+		public_id: "",
+	},
 }
 
-export default function MovieForm() {
+export default function MovieForm({ trailer }) {
 	const [movieInfo, setMovieInfo] = useState({ ...defaultMovieInfo })
 	const [isWritersModalVisible, setIsWritersModalVisible] = useState(false)
 	const [isCastModalVisible, setIsCastModalVisible] = useState(false)
 	const [poster, setPoster] = useState("")
 	const [isGenresModalVisible, setIsGenresModalVisible] = useState(false)
-
-	function handleSubmit(e) {
-		e.preventDefault()
-
-		console.log(movieInfo)
-	}
+	const [writerProfile, setWriterProfile] = useState()
+	const [writers, setWriters] = useState([])
+	const [directorProfile, setDirectorProfile] = useState("")
 
 	const { updateNotification } = useNotification()
+
+	async function handleSubmit(e) {
+		e.preventDefault()
+
+		setMovieInfo(prev => {
+			return {
+				...prev,
+				trailer: {
+					public_id: "iiq7jeltq5zchhbr335y",
+					url: "https://res.cloudinary.com/dgwonhl7c/video/upload/v1713627145/iiq7jeltq5zchhbr335y.mp4",
+				},
+			}
+		})
+
+		const sanitizedCast = movieInfo.actors.map(c => ({
+			id: c.profile._id,
+			roleAs: c.roleAs,
+			leadActor: c.leadActor,
+		}))
+
+		console.log(movieInfo)
+		const formData = new FormData()
+		formData.append("title", movieInfo.title)
+		formData.append("storyLine", movieInfo.storyLine)
+		formData.append("director", movieInfo.director)
+		formData.append("writers", JSON.stringify(movieInfo.writers))
+		formData.append("releaseDate", "2024-04-04")
+		formData.append("type", movieInfo.type)
+		formData.append("genres", JSON.stringify(movieInfo.genres))
+		formData.append("language", movieInfo.language)
+		formData.append("status", "public")
+		formData.append("tags", JSON.stringify(["action"]))
+		formData.append("trailer", JSON.stringify(trailer))
+		formData.append("poster", movieInfo.poster)
+
+		formData.append("actors", JSON.stringify(sanitizedCast))
+
+		console.log("formData: ", formData)
+		const res = await uploadMovie(formData)
+		console.log(res)
+
+		if (res?.error) {
+			updateNotification("error", "Failed to create movie entry")
+			return
+		}
+		console.log("MOVIE IS UPLOADED WHAAAA R U WAITNG 4")
+		updateNotification("success", "Movie is uploaded")
+	}
+
+	useEffect(() => {
+		setMovieInfo(prevMovieInfo => ({
+			...prevMovieInfo,
+			trailer: trailer,
+		}))
+
+		console.log("trailer in useEffect: ", trailer)
+	}, [trailer])
+
+	const { handleSearch, resetSearch } = useSearch()
 
 	function handleChange({ target }) {
 		const { value, name, files } = target
 
 		if (name === "poster") {
 			const poster = files[0]
+			console.log(URL.createObjectURL(poster))
 			setPoster(URL.createObjectURL(poster))
+
 			return setMovieInfo({ ...movieInfo, poster })
 		}
+
+		if (name === "director") {
+			console.log("LOLAA")
+		}
+		// if (name === "writers") {
+		// }
 
 		setMovieInfo({ ...movieInfo, [name]: value })
 	}
@@ -103,31 +142,51 @@ export default function MovieForm() {
 
 	function updateDirector(profile) {
 		setMovieInfo({ ...movieInfo, director: profile })
+		resetSearch()
 	}
 
 	function updateCast(castInfo) {
-		const { cast } = movieInfo
-		setMovieInfo({ ...movieInfo, cast: [...cast, castInfo] })
+		const { actors } = movieInfo
+		setMovieInfo({ ...movieInfo, actors: [...actors, castInfo] })
 	}
 
 	function updateWriters(writer) {
-		if (!movieInfo.writers.includes(writer)) {
-			setMovieInfo({ ...movieInfo, writers: [...movieInfo.writers, writer] })
+		const isWriterSelectedAlready = movieInfo.writers.some(w => w._id === writer._id)
+
+		if (!isWriterSelectedAlready) {
+			const newWriter = [...movieInfo.writers, writer]
+
+			setMovieInfo({ ...movieInfo, writers: newWriter })
+			setWriterProfile()
+			resetSearch()
 			return
 		}
-		updateNotification("Warning", "This profile is already selected")
+		updateNotification("warning", "This profile is already selected")
 	}
 
-	const { title, storyLine, director, writers, cast, type, language, status } = movieInfo
+	async function handleProfileChange({ target }) {
+		const { name, value } = target
+
+		if (name === "director") {
+			handleSearch(searchDirector, value, setDirectorProfile)
+		}
+
+		if (name === "writers") {
+			handleSearch(searchWriter, value, setWriters)
+			setWriterProfile(value)
+		}
+	}
+
+	let { title, storyLine, director, actors, type, language, status } = movieInfo
 
 	function handleRemoveWriter(writer) {
-		const modifiedArray = movieInfo.writers.filter(w => w.name !== writer)
+		const modifiedArray = movieInfo.writers.filter(w => w !== writer)
 		setMovieInfo({ ...movieInfo, writers: [...modifiedArray] })
 	}
 
-	function handleRemoveCast(castName) {
-		const modifedArray = cast.filter(c => c.profile.name !== castName)
-		setMovieInfo({ ...movieInfo, cast: [...modifedArray] })
+	function handleRemoveCast(actor) {
+		const modifedArray = actors.filter(c => c.profile.name !== actor)
+		setMovieInfo({ ...movieInfo, actors: [...modifedArray] })
 	}
 
 	function handleGenresModal() {
@@ -176,19 +235,21 @@ export default function MovieForm() {
 						<LiveSearch
 							name="director"
 							value={director.name}
-							results={results}
+							results={directorProfile}
 							placeholder="Search profile"
 							renderItem={renderItem}
 							onSelect={updateDirector}
+							onChange={handleProfileChange}
+							isModalVisible={directorProfile}
 						/>
 					</div>
 
 					<div>
 						<div className="flex justify-between">
-							<LabelWithBadge htmlFor="writers" badge={writers.length}>
+							<LabelWithBadge htmlFor="writers" badge={movieInfo?.writers.length}>
 								Writers
 							</LabelWithBadge>
-							{writers.length > 0 && (
+							{movieInfo?.writers.length > 0 && (
 								<button
 									className="dark:text-white text-primary"
 									onClick={() => setIsWritersModalVisible(true)}
@@ -200,17 +261,20 @@ export default function MovieForm() {
 
 						<LiveSearch
 							name="writers"
-							results={results}
+							results={writers}
 							placeholder="Search profile"
 							renderItem={renderItem}
 							onSelect={updateWriters}
+							value={writerProfile?.name}
+							onChange={handleProfileChange}
+							isModalVisible={writers.length}
 						/>
 					</div>
 
 					<div>
 						<div className="flex justify-between">
-							<LabelWithBadge badge={cast.length}>Add Cast & Crew</LabelWithBadge>
-							{cast.length > 0 && (
+							<LabelWithBadge badge={actors.length}>Add Cast & Crew</LabelWithBadge>
+							{actors.length > 0 && (
 								<button
 									type="button"
 									className="dark:text-white text-primary"
@@ -242,7 +306,12 @@ export default function MovieForm() {
 					</button>
 				</div>
 				<div className="w-[30%] space-y-5">
-					<SelectPoster name="poster" onChange={handleChange} selectedPoster={poster} label="Select Poster" />
+					<SelectPoster
+						name="poster"
+						onChange={handleChange}
+						selectedPoster={poster}
+						label="Select Poster"
+					/>
 
 					<SelectGenres onClick={() => setIsGenresModalVisible(true)} />
 					<Selector
@@ -268,23 +337,17 @@ export default function MovieForm() {
 					/>
 				</div>
 			</div>
-			{/* <ModalComponent
-				isModalVisible={isModalVisible}
-				onClose={() => setIsModalVisible(value => !value)}
-			>
-				<div className="p-20 bg-red-200"></div>
-			</ModalComponent> */}
 
 			<WritersModal
 				isModalVisible={isWritersModalVisible}
-				onClose={() => setIsWritersModalVisible(value => !value)}
-				profiles={writers}
+				onClose={() => setIsWritersModalVisible(false)}
+				profiles={movieInfo.writers}
 				modifyWriters={handleRemoveWriter}
 			/>
 			<CastModal
 				isModalVisible={isCastModalVisible}
-				onClose={() => setIsWritersModalVisible(false)}
-				casts={cast}
+				onClose={() => setIsCastModalVisible(false)}
+				casts={actors}
 				onRemoveClick={handleRemoveCast}
 			/>
 			<GenresModal

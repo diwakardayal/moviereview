@@ -1,6 +1,6 @@
 import axios from "axios"
 
-async function uploadMovie(formData, onUploadProgress) {
+async function uploadTrailer(formData, onUploadProgress) {
 	try {
 		const { data } = await axios.post("/api/movie/trailer", formData, {
 			onUploadProgress: ({ loaded, total }) => {
@@ -14,4 +14,19 @@ async function uploadMovie(formData, onUploadProgress) {
 	}
 }
 
-export { uploadMovie }
+async function uploadMovie(movieInfo) {
+	try {
+		const data = await axios.post("/api/movie/create", movieInfo, {
+			headers: {
+				"content-type": "multipart/form-data",
+			},
+		})
+		console.log(data)
+		return data
+	} catch (e) {
+		console.log(e)
+		return { error: e }
+	}
+}
+
+export { uploadTrailer, uploadMovie }

@@ -75,7 +75,7 @@ const CreateOptions = ({ isVisible, onClose, onAddMovieClick, onAddActorClick })
 			}}
 		>
 			<Option onClick={onAddMovieClick}>Add Movie</Option>
-			<Option onClick={onAddActorClick}>Add Actor</Option>
+			<Option onClick={onAddActorClick}>Add Cast</Option>
 		</div>
 	)
 }

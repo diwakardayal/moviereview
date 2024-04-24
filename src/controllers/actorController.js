@@ -12,14 +12,24 @@ const Actor = require("../db/models/actor")
 const getActorByName = asyncHandler(async (req, res) => {
 	const { actorName } = req.params
 
-	const actor = await Actor.findOne({ name: actorName })
-
-	if (!actor) {
-		res.status(404)
-		throw new Error("Actor not found")
+	if (!actorName.trim()) {
+		res.status(400)
+		throw new Error("Invalid request")
 	}
 
-	res.status(200).json({ actor })
+	const result = await Actor.find({
+		name: { $regex: actorName, $options: "i" },
+	})
+
+	const sanitizedResult = result.map(({ _id, name, about, gender, avatar }) => ({
+		_id,
+		name,
+		about,
+		gender,
+		avatar: avatar?.url,
+	}))
+
+	res.status(200).json({ results: sanitizedResult })
 })
 
 // @desc Create actor

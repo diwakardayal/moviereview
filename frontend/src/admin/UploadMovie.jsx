@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { FileUploader } from "react-drag-drop-files"
-import { uploadMovie } from "../services/movie"
+import { uploadTrailer } from "../services/movie"
 import { useNotification } from "../hooks"
 import { AiOutlineCloudUpload } from "react-icons/ai"
 import { useState } from "react"
@@ -12,24 +12,9 @@ export default function UploadMovie({ isMovieFormVisible, onClose }) {
 	const [isVideoSelected, setIsVideoSelected] = useState(false)
 	const [isVideoUploaded, setIsVideoUploaded] = useState(false)
 	const [uploadProgress, setUploadProgress] = useState(0)
-	// eslint-disable-next-line no-unused-vars
-	const [movieInfo, setMovieInfo] = useState({
-		title: "",
-		storyLine: "",
-		tags: [],
-		cast: [],
-		directory: {},
-		writers: [],
-		releaseDate: "",
-		poster: null,
-		genres: [],
-		type: "",
-		language: "",
-		status: "",
-		trailer: {
-			url: "",
-			public_id: "",
-		},
+	const [trailer, setTrailer] = useState({
+		url: "",
+		public_id: "",
 	})
 
 	const { updateNotification } = useNotification()
@@ -40,13 +25,24 @@ export default function UploadMovie({ isMovieFormVisible, onClose }) {
 	}
 
 	async function handleChange(file) {
-		const formData = new FormData()
-		formData.append("video", file)
+		try {
+			const formData = new FormData()
+			formData.append("video", file)
 
-		setIsVideoSelected(true)
-		const res = await uploadMovie(formData, setUploadProgress)
+			setIsVideoSelected(true)
+			const res = await uploadTrailer(formData, setUploadProgress)
+			const { public_id, url } = res
+			console.log(public_id, url)
+			setTrailer({
+				public_id,
+				url,
+			})
 
-		if (!res.error) {
+			setIsVideoUploaded(true)
+			if (!res.error) {
+				setIsVideoUploaded(false)
+			}
+		} catch (e) {
 			setIsVideoUploaded(false)
 		}
 	}
@@ -61,17 +57,20 @@ export default function UploadMovie({ isMovieFormVisible, onClose }) {
 
 	return (
 		<ModalComponent isModalVisible={isMovieFormVisible} onClose={onClose}>
-			{/* <UploadProgress
-					visible={isVideoSelected && !isVideoUploaded}
-					message={getUploadProgressValue()}
-					width={uploadProgress}
-					/>
-					<TrailerComponent
+			<UploadProgress
+				visible={isVideoSelected && !isVideoUploaded && uploadProgress < 99}
+				message={getUploadProgressValue()}
+				width={uploadProgress}
+			/>
+			{!isVideoSelected ? (
+				<TrailerComponent
 					visible={!isVideoSelected}
 					handleChange={handleChange}
 					handleTypeError={handleTypeError}
-				/> */}
-			<MovieForm />
+				/>
+			) : (
+				<MovieForm trailer={trailer} />
+			)}
 		</ModalComponent>
 	)
 }

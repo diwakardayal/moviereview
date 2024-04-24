@@ -2,8 +2,9 @@
 import { useState } from "react"
 import LiveSearch from "./LiveSearch"
 import { commonInputClasses } from "../utils/theme"
-import { renderItem, results } from "../admin/MovieForm"
-import { useNotification } from "../hooks"
+import { renderItem } from "../admin/MovieForm"
+import { useNotification, useSearch } from "../hooks"
+import { searchActor } from "../services/actor"
 
 const defaultCastInfo = {
 	profile: {},
@@ -13,8 +14,11 @@ const defaultCastInfo = {
 
 export default function CastForm({ onSubmit }) {
 	const [castInfo, setCastInfo] = useState({ ...defaultCastInfo })
+	const { handleSearch } = useSearch()
+	const [actorName, setActorName] = useState("")
+	const [actors, setActors] = useState([])
 
-	const { leadActor, profile, roleAs } = castInfo
+	const { leadActor, roleAs } = castInfo
 
 	const { updateNotification } = useNotification()
 
@@ -27,6 +31,7 @@ export default function CastForm({ onSubmit }) {
 	}
 
 	function handleProfileSelect(profile) {
+		setActorName(profile.name)
 		setCastInfo({ ...castInfo, profile })
 	}
 
@@ -39,6 +44,13 @@ export default function CastForm({ onSubmit }) {
 
 		onSubmit(castInfo)
 		setCastInfo({ ...defaultCastInfo })
+		setActorName("")
+	}
+
+	function handleOnChangeLiveSearch(e) {
+		const { value } = e.target
+
+		handleSearch(searchActor, value, setActors)
 	}
 
 	return (
@@ -51,13 +63,19 @@ export default function CastForm({ onSubmit }) {
 				onChange={handleOnChange}
 				title="Set as lead actor"
 			/>
-			<LiveSearch
-				placeholder="Search profile"
-				value={profile.name}
-				results={results}
-				onSelect={handleProfileSelect}
-				renderItem={renderItem}
-			/>
+
+			<div className="w-full">
+				<LiveSearch
+					name="cast&Crew"
+					placeholder="Search profile"
+					value={actorName}
+					results={actors}
+					onSelect={handleProfileSelect}
+					renderItem={renderItem}
+					onChange={handleOnChangeLiveSearch}
+					isModalVisible={actors.length}
+				/>
+			</div>
 			<span className="dark:text-dark-subtle text-light-subtle font-semibold">as</span>
 
 			<input
