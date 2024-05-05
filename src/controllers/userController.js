@@ -114,9 +114,26 @@ const resendEmailVerificationOTP = asyncHandler(async (req, res) => {
 	res.json({ message: "Please verify your email. OTP has been sent to your email accont!" })
 })
 
+/*
+    @desc Get all users
+    @route GET /api/users/
+    @access Private
+*/
+const getUsers = asyncHandler(async (req, res) => {
+	const users = await User.find()
+
+	if (!users || users.length === 0) {
+		res.status(404)
+		throw new Error("User not found")
+	}
+
+	res.status(200).json({ users })
+})
+
 module.exports = {
 	registerUser,
 	authUser,
 	verifyEmail,
 	resendEmailVerificationOTP,
+	getUsers,
 }

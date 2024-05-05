@@ -75,12 +75,11 @@ const createMovie = asyncHandler(async (req, res) => {
 	})
 
 	if (director) {
-		newMovie.director = director._id
+		newMovie.director = director
 	}
 
 	if (writers) {
-		const writersId = writers.map(w => w._id)
-		newMovie.writers = writersId
+		newMovie.writers = writers
 	}
 
 	// uploading poster
@@ -159,7 +158,7 @@ const updateMovieWithoutPoster = asyncHandler(async (req, res) => {
 	movie.releaseDate = releaseDate
 	movie.status = status
 	movie.type = type
-	movie.actors = JSON.parse(JSON.stringify(actors))
+	movie.actors = actors
 	movie.genres = genres
 	movie.trailer = trailer
 	movie.language = language
@@ -308,12 +307,16 @@ const updateMovieWithPoster = asyncHandler(async (req, res) => {
 const removeMovie = asyncHandler(async (req, res) => {
 	const { movieId } = req.params
 
+	console.log(movieId)
+
 	if (!isValidObjectId(movieId)) {
 		res.status(400)
 		throw Error("Invalid Movie ID!")
 	}
 
 	const movie = await Movie.findById(movieId)
+
+	console.log(movie)
 	if (!movie) {
 		res.status(404)
 		throw Error("Movie Not Found!")
@@ -326,28 +329,71 @@ const removeMovie = asyncHandler(async (req, res) => {
 	if (posterId) {
 		const { result } = await cloudinary.uploader.destroy(posterId)
 		if (result !== "ok") {
-			res.status(400)
-			throw Error("Could not remove poster from cloud!")
+			/* temp: disable poster remove feat.
+				res.status(400)
+				throw new Error("Could not remove poster from cloud!")
+			*/
 		}
 	}
 
 	// removing trailer
 	const trailerId = movie.trailer?.public_id
 	if (!trailerId) {
-		res.status(400)
-		throw Error("Could not find trailer in the cloud!")
+		/* temp: disable trailer remove feat.
+			res.status(400)
+			throw Error("Could not find trailer in the cloud!")
+		*/
 	}
 	const { result } = await cloudinary.uploader.destroy(trailerId, {
 		resource_type: "video",
 	})
 	if (result !== "ok") {
+		/** temp: disable trailer remove feat.
 		res.status(400)
 		throw Error("Could not remove trailer from cloud!")
+		*/
 	}
 
 	await Movie.findByIdAndDelete(movieId)
 
 	res.json({ message: "Movie removed successfully." })
+})
+
+const getMovies = asyncHandler(async (req, res) => {
+	const movies = await Movie.find()
+
+	if (!movies || movies.length === 0) {
+		res.status(500)
+		throw Error("No Movie found")
+	}
+
+	res.status(200).json({ movies })
+})
+
+// @desc Get movie by id
+// @route GET /api/movie/:movieId
+// @access Public
+const getMovieById = asyncHandler(async (req, res) => {
+	const { movieId } = req.params
+
+	if (!movieId) {
+		res.status(400)
+		throw Error("Please Provide movieId")
+	}
+
+	const movie = await Movie.findById(movieId)
+
+	if (!movie) {
+		res.status(404)
+		throw Error("Movie not found")
+	}
+
+	delete movie._v
+	delete movie.updatedAt
+	delete movie.createdAt
+	delete movie.reviews
+	delete movie.poster.responsive
+	res.status(200).json(movie)
 })
 
 module.exports = {
@@ -356,4 +402,6 @@ module.exports = {
 	updateMovieWithPoster,
 	updateMovieWithoutPoster,
 	removeMovie,
+	getMovies,
+	getMovieById,
 }

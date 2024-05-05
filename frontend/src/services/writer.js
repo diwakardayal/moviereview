@@ -8,4 +8,14 @@ async function searchWriter(writerName) {
 		return { error: e }
 	}
 }
-export { searchWriter }
+
+async function getWriters(ids) {
+	try {
+		const res = await axios.get(`/api/writer/${ids}`)
+		return res?.data
+	} catch (e) {
+		return { error: e }
+	}
+}
+
+export { searchWriter, getWriters }

@@ -22,4 +22,13 @@ async function searchActor(actorName) {
 	}
 }
 
-export { createActor, searchActor }
+async function getActors(ids) {
+	try {
+		const res = await axios.get(`/api/actor/${ids}`)
+		return res?.data
+	} catch (e) {
+		return { error: e }
+	}
+}
+
+export { createActor, searchActor, getActors }

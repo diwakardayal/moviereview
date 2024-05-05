@@ -20,8 +20,8 @@ export default function CastModal({ casts = [], isModalVisible, onClose, onRemov
 						<div className="flex gap-1">
 							<img
 								className="w-16 h-16 aspect-square rounded object-cover"
-								src={profile.avatar}
-								alt={profile.avatar}
+								src={profile?.avatar}
+								alt={profile?.avatar}
 							/>
 						</div>
 						<div className="w-full flex flex-col">

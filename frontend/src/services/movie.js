@@ -29,4 +29,48 @@ async function uploadMovie(movieInfo) {
 	}
 }
 
-export { uploadTrailer, uploadMovie }
+async function getMovies() {
+	try {
+		const res = await axios.get("/api/movie/")
+
+		return { movies: res.data.movies }
+	} catch (e) {
+		return { error: e.response.data.message }
+	}
+}
+
+async function getMovieById(movieId) {
+	try {
+		const res = await axios.get(`/api/movie/${movieId}`)
+
+		return { res: res.data }
+	} catch (e) {
+		return { error: e }
+	}
+}
+
+async function updateMovie(movieId, movieInfo) {
+	try {
+		const res = await axios.put(`/api/movie/update/${movieId}`, movieInfo, {
+			headers: {
+				"content-type": "multipart/form-data",
+			},
+		})
+
+		return { res: res.data }
+	} catch (e) {
+		return { error: e }
+	}
+}
+
+async function deleteMovie(movieId) {
+	try {
+		const res = await axios.delete(`/api/movie/${movieId}`)
+
+		return { success: res?.data?.message }
+	} catch (e) {
+		return { error: e?.response?.request?.statusText }
+	}
+}
+
+export { uploadTrailer, uploadMovie, getMovies, getMovieById, updateMovie, deleteMovie }

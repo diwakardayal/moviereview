@@ -8,4 +8,13 @@ async function searchDirector(directorName) {
 		return { error: e }
 	}
 }
-export { searchDirector }
+
+async function getDirectors(ids) {
+	try {
+		const res = await axios.get(`/api/director/${ids}`)
+		return res?.data
+	} catch (e) {
+		return { error: e }
+	}
+}
+export { searchDirector, getDirectors }

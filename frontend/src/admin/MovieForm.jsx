@@ -13,9 +13,11 @@ import SelectGenres from "../components/SelectGenres"
 import GenresModal from "../components/modal/GenresModal"
 import Selector from "../components/Selector"
 import { typeOptions, statusOptions, languageOptions } from "../utils/options"
-import { uploadMovie } from "../services/movie"
-import { searchDirector } from "../services/director"
-import { searchWriter } from "../services/writer"
+import { updateMovie, uploadMovie } from "../services/movie"
+import { getDirectors, searchDirector } from "../services/director"
+import { getWriters, searchWriter } from "../services/writer"
+import { getActors } from "../services/actor"
+import { ImSpinner3 } from "react-icons/im"
 
 export function renderItem(result) {
 	return (
@@ -25,28 +27,27 @@ export function renderItem(result) {
 		</div>
 	)
 }
-
-const defaultMovieInfo = {
-	title: "",
-	storyLine: "",
-	tags: [],
-	actors: [],
-	director: {},
-	writers: [],
-	releaseDate: "",
-	poster: null,
-	genres: [],
-	type: "",
-	language: "",
-	status: "",
-	trailer: {
-		url: "",
-		public_id: "",
-	},
-}
-
-export default function MovieForm({ trailer }) {
-	const [movieInfo, setMovieInfo] = useState({ ...defaultMovieInfo })
+export default function MovieForm({ trailer, initialFormData = null, movieId = null, onClose }) {
+	const [movieInfo, setMovieInfo] = useState(
+		initialFormData || {
+			title: "",
+			storyLine: "",
+			tags: [],
+			actors: [],
+			director: {},
+			writers: [],
+			releaseDate: "",
+			poster: null,
+			genres: [],
+			type: "",
+			language: "",
+			status: "",
+			trailer: {
+				url: "",
+				public_id: "",
+			},
+		},
+	)
 	const [isWritersModalVisible, setIsWritersModalVisible] = useState(false)
 	const [isCastModalVisible, setIsCastModalVisible] = useState(false)
 	const [poster, setPoster] = useState("")
@@ -54,21 +55,12 @@ export default function MovieForm({ trailer }) {
 	const [writerProfile, setWriterProfile] = useState()
 	const [writers, setWriters] = useState([])
 	const [directorProfile, setDirectorProfile] = useState("")
+	const [processing, setProcessing] = useState(false)
 
 	const { updateNotification } = useNotification()
 
 	async function handleSubmit(e) {
 		e.preventDefault()
-
-		setMovieInfo(prev => {
-			return {
-				...prev,
-				trailer: {
-					public_id: "iiq7jeltq5zchhbr335y",
-					url: "https://res.cloudinary.com/dgwonhl7c/video/upload/v1713627145/iiq7jeltq5zchhbr335y.mp4",
-				},
-			}
-		})
 
 		const sanitizedCast = movieInfo.actors.map(c => ({
 			id: c.profile._id,
@@ -76,33 +68,45 @@ export default function MovieForm({ trailer }) {
 			leadActor: c.leadActor,
 		}))
 
-		console.log(movieInfo)
+		const sanitizedWritersOnlyWithIds = movieInfo.writers.map(w => w._id)
 		const formData = new FormData()
 		formData.append("title", movieInfo.title)
 		formData.append("storyLine", movieInfo.storyLine)
-		formData.append("director", movieInfo.director)
-		formData.append("writers", JSON.stringify(movieInfo.writers))
-		formData.append("releaseDate", "2024-04-04")
+		formData.append("director", movieInfo.director._id)
+		formData.append("writers", JSON.stringify(sanitizedWritersOnlyWithIds))
+		formData.append("releaseDate", movieInfo.releaseDate)
 		formData.append("type", movieInfo.type)
 		formData.append("genres", JSON.stringify(movieInfo.genres))
 		formData.append("language", movieInfo.language)
-		formData.append("status", "public")
-		formData.append("tags", JSON.stringify(["action"]))
-		formData.append("trailer", JSON.stringify(trailer))
+		formData.append("status", movieInfo.status)
+		formData.append("tags", JSON.stringify(movieInfo.tags))
+		formData.append("trailer", JSON.stringify(movieInfo.trailer))
 		formData.append("poster", movieInfo.poster)
-
 		formData.append("actors", JSON.stringify(sanitizedCast))
 
-		console.log("formData: ", formData)
-		const res = await uploadMovie(formData)
-		console.log(res)
+		setProcessing(true)
 
-		if (res?.error) {
-			updateNotification("error", "Failed to create movie entry")
+		let res
+		if (initialFormData) {
+			res = await updateMovie(movieId, formData)
+			if (res?.error) {
+				updateNotification("error", "Failed to update movie")
+			}
+			updateNotification("success", "Movie is updated")
+			window.location.reload()
+			onClose()
 			return
 		}
-		console.log("MOVIE IS UPLOADED WHAAAA R U WAITNG 4")
+
+		res = await uploadMovie(formData)
+		if (res?.error) {
+			updateNotification("error", "Failed to create movie")
+			return
+		}
 		updateNotification("success", "Movie is uploaded")
+		setProcessing(false)
+		window.location.reload()
+		onClose()
 	}
 
 	useEffect(() => {
@@ -110,9 +114,77 @@ export default function MovieForm({ trailer }) {
 			...prevMovieInfo,
 			trailer: trailer,
 		}))
-
-		console.log("trailer in useEffect: ", trailer)
 	}, [trailer])
+
+	async function fetchDirectors(ids) {
+		const res = await getDirectors(ids)
+		if (res.error) {
+			return
+		}
+
+		return res.results[0]
+	}
+
+	async function fetchWriters(ids) {
+		const res = await getWriters(ids)
+
+		if (res.error) {
+			return
+		}
+		return res.results
+	}
+
+	async function initialiseForm() {
+		const directorId = initialFormData.director
+
+		const actorsIds = initialFormData.actors.map(a => a.id)
+
+		const actors = await getActors(actorsIds)
+
+		const ac = actors.results.map(x => {
+			const actorInfo = initialFormData.actors.find(a => {
+				if (a.id === x._id) {
+					return a
+				}
+			})
+
+			return {
+				profile: {
+					_id: x._id,
+					name: x.name,
+					about: x.name,
+					gender: x.gender,
+					avatar: x.avatar.url,
+				},
+				roleAs: actorInfo.roleAs,
+				leadActor: actorInfo.leadActor,
+			}
+		})
+		initialFormData.actors = ac
+		const director = await fetchDirectors(directorId)
+		let writers = await fetchWriters(initialFormData.writers)
+		initialFormData.director = director
+
+		writers = writers.map(({ _id, name, about, avatar }) => ({
+			_id,
+			name,
+			about,
+			avatar: avatar.url,
+		}))
+		initialFormData.writers = writers
+
+		const date = initialFormData.releaseDate.split("T")[0]
+
+		initialFormData.releaseDate = date
+
+		setMovieInfo(initialFormData)
+	}
+
+	useEffect(() => {
+		if (initialFormData) {
+			initialiseForm()
+		}
+	}, [initialFormData])
 
 	const { handleSearch, resetSearch } = useSearch()
 
@@ -121,17 +193,11 @@ export default function MovieForm({ trailer }) {
 
 		if (name === "poster") {
 			const poster = files[0]
-			console.log(URL.createObjectURL(poster))
+
 			setPoster(URL.createObjectURL(poster))
 
 			return setMovieInfo({ ...movieInfo, poster })
 		}
-
-		if (name === "director") {
-			console.log("LOLAA")
-		}
-		// if (name === "writers") {
-		// }
 
 		setMovieInfo({ ...movieInfo, [name]: value })
 	}
@@ -177,7 +243,7 @@ export default function MovieForm({ trailer }) {
 		}
 	}
 
-	let { title, storyLine, director, actors, type, language, status } = movieInfo
+	let { title, storyLine, actors, type, language, status } = movieInfo
 
 	function handleRemoveWriter(writer) {
 		const modifiedArray = movieInfo.writers.filter(w => w !== writer)
@@ -227,29 +293,34 @@ export default function MovieForm({ trailer }) {
 					</div>
 					<div>
 						<Label htmlFor="tags">Tags</Label>
-						<TagsInput names="tags" onChange={updateTags} />
+						<TagsInput
+							names="tags"
+							onChange={updateTags}
+							initialTags={movieInfo.tags}
+						/>
 					</div>
 
 					<div>
 						<Label htmlFor="director">Director</Label>
 						<LiveSearch
 							name="director"
-							value={director.name}
+							value={movieInfo?.director?.name}
 							results={directorProfile}
 							placeholder="Search profile"
 							renderItem={renderItem}
 							onSelect={updateDirector}
 							onChange={handleProfileChange}
 							isModalVisible={directorProfile}
+							caller="director"
 						/>
 					</div>
 
 					<div>
 						<div className="flex justify-between">
-							<LabelWithBadge htmlFor="writers" badge={movieInfo?.writers.length}>
+							<LabelWithBadge htmlFor="writers" badge={movieInfo?.writers?.length}>
 								Writers
 							</LabelWithBadge>
-							{movieInfo?.writers.length > 0 && (
+							{movieInfo?.writers?.length > 0 && (
 								<button
 									className="dark:text-white text-primary"
 									onClick={() => setIsWritersModalVisible(true)}
@@ -295,21 +366,28 @@ export default function MovieForm({ trailer }) {
 								commonInputClasses +
 								" border-2 rounded p-1 w-auto dark:[color-scheme:dark]"
 							}
+							value={initialFormData?.releaseDate}
 						/>
 					</div>
 
 					<button
 						onClick={handleSubmit}
-						className="w-full rounded dark:bg-white bg-secondary dark:text-secondary text-white hover:bg-opacity-90 transition font-semibold text-lg cursor-pointer p-1 mt-5"
+						className="flex justify-center w-full rounded dark:bg-white bg-secondary dark:text-secondary text-white hover:bg-opacity-90 transition font-semibold text-lg cursor-pointer p-1 mt-5"
 					>
-						Submit
+						{processing ? (
+							<ImSpinner3 className="animate-spin text-3xl  " />
+						) : initialFormData ? (
+							"Update"
+						) : (
+							"Submit"
+						)}
 					</button>
 				</div>
 				<div className="w-[30%] space-y-5">
 					<SelectPoster
 						name="poster"
 						onChange={handleChange}
-						selectedPoster={poster}
+						selectedPoster={poster || movieInfo?.poster?.url}
 						label="Select Poster"
 					/>
 
@@ -326,14 +404,14 @@ export default function MovieForm({ trailer }) {
 						name="language"
 						label="Language"
 						value={language}
-						options={statusOptions}
+						options={languageOptions}
 					/>
 					<Selector
 						onChange={handleChange}
 						name="status"
 						label="Status"
 						value={status}
-						options={languageOptions}
+						options={statusOptions}
 					/>
 				</div>
 			</div>
@@ -347,7 +425,7 @@ export default function MovieForm({ trailer }) {
 			<CastModal
 				isModalVisible={isCastModalVisible}
 				onClose={() => setIsCastModalVisible(false)}
-				casts={actors}
+				casts={movieInfo.actors}
 				onRemoveClick={handleRemoveCast}
 			/>
 			<GenresModal

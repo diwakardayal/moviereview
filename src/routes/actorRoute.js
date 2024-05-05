@@ -6,6 +6,7 @@ const {
 	deleteActor,
 	getActors,
 	getActorById,
+	getActorsByIds,
 } = require("../controllers/actorController")
 const { uploadImage } = require("../middleware/multer")
 const { requireAuth, admin } = require("../middleware/auth")
@@ -20,5 +21,6 @@ router
 	.delete(requireAuth, admin, deleteActor)
 router.route("/actorName/:actorName").get(getActorByName)
 router.route("/actorId/:actorId").get(getActorById)
+router.route("/:ids").get(getActorsByIds)
 
 module.exports = router

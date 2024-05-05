@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-shadow */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable camelcase */
@@ -177,4 +178,39 @@ const getActorById = asyncHandler(async (req, res) => {
 	res.status(200).json({ actor })
 })
 
-module.exports = { getActorByName, createActor, updateActor, deleteActor, getActors, getActorById }
+// @desc Get actors by Id
+// @route GET /api/actor/:ids
+// @access Public
+const getActorsByIds = asyncHandler(async (req, res) => {
+	const { ids } = req.params
+
+	try {
+		let results = []
+		for (let id of ids.split(",")) {
+			// eslint-disable-next-line no-await-in-loop
+			const actor = await Actor.findById(id)
+			results.push(actor)
+		}
+
+		results = results.map(obj => {
+			const { _id, name, about, gender, avatar } = obj._doc
+			return { _id, name, about, gender, avatar }
+		})
+
+		res.status(200).json({ results })
+	} catch (e) {
+		console.log(e)
+		res.status(400)
+		throw Error("Internal Server Error")
+	}
+})
+
+module.exports = {
+	getActorByName,
+	createActor,
+	updateActor,
+	deleteActor,
+	getActors,
+	getActorById,
+	getActorsByIds,
+}

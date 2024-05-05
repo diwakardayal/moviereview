@@ -6,11 +6,11 @@ const { isValidObjectId } = require("mongoose")
 const genres = require("../db/genres")
 
 const validate = (req, res, next) => {
-	const error = validationResult(req).array()
-	if (error.length) {
-		res.status(400)
-		throw Error(error[0].msg)
-	}
+	// const error = validationResult(req).array()
+	// if (error.length) {
+	// 	res.status(400)
+	// 	throw Error(error[0].msg)
+	// }
 
 	next()
 }
@@ -20,6 +20,8 @@ const validateMovie = [
 	check("storyLine").trim().not().isEmpty().withMessage("Storyline is missing!"),
 	check("language").trim().not().isEmpty().withMessage("Language is missing!"),
 	// check("releaseDate").isEmpty().withMessage("release date is missing!"),
+	check("writers").isArray().not().isEmpty().withMessage("Writer is missing!"),
+	check("director").not().isEmpty().withMessage("Director is missing!"),
 	check("status")
 		.isIn(["public", "private"])
 		.withMessage("Movie status must be public or private!"),
