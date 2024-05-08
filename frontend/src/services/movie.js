@@ -41,7 +41,7 @@ async function getMovies() {
 
 async function getMovieById(movieId) {
 	try {
-		const res = await axios.get(`/api/movie/${movieId}`)
+		const res = await axios.get(`/api/movie/getMovieById/${movieId}`)
 
 		return { res: res.data }
 	} catch (e) {
@@ -73,4 +73,39 @@ async function deleteMovie(movieId) {
 	}
 }
 
-export { uploadTrailer, uploadMovie, getMovies, getMovieById, updateMovie, deleteMovie }
+async function getLatestUploads() {
+	try {
+		const res = await axios.get(`/api/movie/latest/5`)
+
+		return { movies: res?.data.movies }
+	} catch (e) {
+		console.log(e)
+		return { error: e?.response?.request?.statusText }
+	}
+}
+
+async function getTopRatedMovies(type) {
+	try {
+		let endpoint = "/api/movie/top-rated"
+		if (type) endpoint = endpoint + "?type=" + type
+
+		const res = await axios.get(endpoint)
+		console.log("res  ", res)
+
+		return { movies: res?.data.movies }
+	} catch (e) {
+		console.log(e)
+		return { error: e?.response?.request?.statusText }
+	}
+}
+
+export {
+	uploadTrailer,
+	uploadMovie,
+	getMovies,
+	getMovieById,
+	updateMovie,
+	deleteMovie,
+	getLatestUploads,
+	getTopRatedMovies,
+}

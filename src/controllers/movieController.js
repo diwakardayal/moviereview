@@ -5,6 +5,7 @@ const { isValidObjectId } = require("mongoose")
 const cloudinary = require("../db/cloud")
 const asyncHandler = require("../middleware/asyncHandler")
 const Movie = require("../db/models/movie")
+const { topRatedMoviesPipeline, getAverageRatings } = require("../utils/helper")
 
 // @desc Post trailer
 // @route POST /api/movie/trailer
@@ -396,6 +397,58 @@ const getMovieById = asyncHandler(async (req, res) => {
 	res.status(200).json(movie)
 })
 
+// @desc Get latest movies
+// @route GET /api/movie/latest/:limit
+// @access Public
+const getLatestMovies = asyncHandler(async (req, res) => {
+	const { limit = 5 } = req.params
+
+	const movies = await Movie.find({ status: "public" })
+		.sort("-createdAt")
+		.limit(parseInt(limit, 10))
+
+	if (!movies || movies.length === 0) {
+		res.status(404)
+		throw new Error("Movie not found")
+	}
+
+	const formattedMovies = movies.map(({ _id, title, storyLine, poster, trailer }) => ({
+		id: _id,
+		title,
+		storyLine,
+		poster: poster?.url,
+		responsivePosters: poster.responsive,
+		trailer: trailer.url,
+	}))
+
+	res.status(200).json({ movies: formattedMovies })
+})
+
+// @desc Get top rated movies, series etc
+// @route GET /api/movie/top-rated/:limit
+// @access Public
+const getTopRatedMovies = asyncHandler(async (req, res) => {
+	const { type = "Film" } = req.params
+
+	const movies = await Movie.aggregate(topRatedMoviesPipeline(type))
+
+	const mapMovies = async m => {
+		const reviews = await getAverageRatings(m._id)
+
+		return {
+			id: m._id,
+			title: m.title,
+			poster: m.poster,
+			responsivePosters: m.responsivePosters,
+			reviews: { ...reviews },
+		}
+	}
+
+	const topRatedMovies = await Promise.all(movies.map(mapMovies))
+
+	res.json({ movies: topRatedMovies })
+})
+
 module.exports = {
 	uploadTrailer,
 	createMovie,
@@ -404,4 +457,6 @@ module.exports = {
 	removeMovie,
 	getMovies,
 	getMovieById,
+	getLatestMovies,
+	getTopRatedMovies,
 }
