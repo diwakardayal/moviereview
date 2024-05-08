@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
-import { useNotification } from "../hooks"
-import MovieList from "./MovieList"
-import { getTopRatedMovies } from "../services/movie"
+import { useNotification } from "../../hooks"
+import MovieList from "../MovieList"
+import { getTopRatedMovies } from "../../services/movie"
 
 export default function TopRatedMovies() {
 	const [movies, setMovies] = useState([])

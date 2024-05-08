@@ -1,5 +1,7 @@
 import HeroSlider from "../components/user/HeroSlider"
-import TopRatedMovies from "../components/TopRatedMovies"
+import TopRatedMovies from "../components/user/TopRatedMovies"
+import TopRatedTVSeries from "../components/user/TopRatedTVSeries"
+import TopRatedWebSeries from "../components/user/TopRatedWebSeries"
 
 export default function Home() {
 	return (
@@ -9,6 +11,8 @@ export default function Home() {
 
 				<div className="space-y-3 py-8">
 					<TopRatedMovies />
+					<TopRatedWebSeries />
+					<TopRatedTVSeries />
 				</div>
 			</div>
 		</div>

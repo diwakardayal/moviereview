@@ -428,7 +428,7 @@ const getLatestMovies = asyncHandler(async (req, res) => {
 // @route GET /api/movie/top-rated/:limit
 // @access Public
 const getTopRatedMovies = asyncHandler(async (req, res) => {
-	const { type = "Film" } = req.params
+	const { type = "Film" } = req.query
 
 	const movies = await Movie.aggregate(topRatedMoviesPipeline(type))
 
