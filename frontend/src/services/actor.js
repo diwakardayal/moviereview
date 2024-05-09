@@ -18,7 +18,7 @@ async function searchActor(actorName) {
 		const res = await axios.get(`/api/actor/actorName/${actorName}`)
 		return res?.data
 	} catch (e) {
-		return { error: e }
+		return { error: e?.response?.request?.statusText }
 	}
 }
 
@@ -27,8 +27,17 @@ async function getActors(ids) {
 		const res = await axios.get(`/api/actor/${ids}`)
 		return res?.data
 	} catch (e) {
-		return { error: e }
+		return { error: e?.response?.request?.statusText }
 	}
 }
 
-export { createActor, searchActor, getActors }
+async function getActorProfile(id) {
+	try {
+		const res = await axios.get(`/api/actor/actorId/${id}`)
+		return res?.data
+	} catch (e) {
+		return { error: e?.response?.request?.statusText }
+	}
+}
+
+export { createActor, searchActor, getActors, getActorProfile }

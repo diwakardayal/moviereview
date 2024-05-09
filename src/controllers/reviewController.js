@@ -1,6 +1,7 @@
 const { isValidObjectId } = require("mongoose")
 const asyncHandler = require("../middleware/asyncHandler")
 const Review = require("../db/models/review")
+const Movie = require("../db/models/movie")
 
 // @desc Get all reviews
 // @route GET /api/review
@@ -41,17 +42,30 @@ const getReviewByMovieId = asyncHandler(async (req, res) => {
 // @route POST /api/movie
 // @access Private/Admin
 const createReview = asyncHandler(async (req, res) => {
-	const { movieId, userId, comment, rating } = req.body
+	const { movieId, comment, rating } = req.body
+	const { _id: userId } = req.user
 
-	if (!movieId || !userId || !comment || !rating) {
+	if (!movieId || !comment || !rating) {
 		res.status(400)
-		throw new Error("Please provide movieId/userId/comment/rating")
+		throw new Error("Please provide movieId/comment/rating")
 	}
 
-	if (!isValidObjectId(movieId) || !isValidObjectId(userId)) {
+	if (!isValidObjectId(movieId)) {
 		res.status(400)
-		throw new Error("Invalid movieId or userId")
+		throw new Error("Invalid movieId")
 	}
+
+	const isAlreadyReviewed = await Review.findOne({
+		userId,
+		movieId,
+	})
+
+	if (isAlreadyReviewed) {
+		res.status(400)
+		throw new Error("Movie is already been reviewed")
+	}
+
+	const movie = await Movie.findOne({ _id: movieId, status: "public" })
 
 	const review = await new Review({
 		movieId,
@@ -59,6 +73,11 @@ const createReview = asyncHandler(async (req, res) => {
 		comment,
 		rating,
 	}).save()
+
+	// eslint-disable-next-line no-underscore-dangle
+	movie.reviews.push(review._id)
+
+	await movie.save()
 
 	res.status(201).json({ review })
 })

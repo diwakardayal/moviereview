@@ -10,6 +10,7 @@ import PrivateRoute from "./components/PrivateRoute.jsx"
 import NotFoundPage from "./Pages/404Page.jsx"
 import ActorsPage from "./admin/ActorsPage.jsx"
 import MoviesPage from "./Pages/MoviesPage.jsx"
+import MoviePage from "./components/user/MoviePage.jsx"
 import { useAuth } from "./hooks/index.js"
 import AdminNavigator from "./navigator/AdminNavigator.jsx"
 
@@ -23,6 +24,7 @@ function App() {
 			<NavBar />
 			<Routes>
 				<Route path="/" element={<Home />} />
+				<Route path="/movie/:movieId" element={<MoviePage />} />
 				<Route path="/register" element={<SignUpForm />} />
 				<Route path="/setNewPassword" element={<ConfirmPassword />} />
 				<Route path="/verifyEmail" element={<EmailVerfication />} />

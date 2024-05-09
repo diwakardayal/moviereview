@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, forwardRef } from "react"
 import { AiOutlineDoubleLeft, AiOutlineDoubleRight } from "react-icons/ai"
 import { Link } from "react-router-dom"
 import { useNotification } from "../../hooks"
-import "react-awesome-slider/dist/styles.css"
 import { getLatestUploads } from "../../services/movie"
 
 let count = 0

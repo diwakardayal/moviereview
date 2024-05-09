@@ -10,6 +10,8 @@ const {
 	getMovieById,
 	getLatestMovies,
 	getTopRatedMovies,
+	getRelatedMovies,
+	getSingleMovie,
 } = require("../controllers/movieController")
 const { uploadVideo, uploadImage } = require("../middleware/multer")
 const { parseData } = require("../utils/helper")
@@ -59,5 +61,7 @@ router
 router.delete("/:movieId", requireAuth, admin, removeMovie)
 router.route("/latest/:limit").get(getLatestMovies)
 router.route("/top-rated").get(getTopRatedMovies)
+router.get("/related/:movieId", getRelatedMovies)
+router.get("/single/:movieId", getSingleMovie)
 
 module.exports = router

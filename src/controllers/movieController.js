@@ -5,7 +5,13 @@ const { isValidObjectId } = require("mongoose")
 const cloudinary = require("../db/cloud")
 const asyncHandler = require("../middleware/asyncHandler")
 const Movie = require("../db/models/movie")
-const { topRatedMoviesPipeline, getAverageRatings } = require("../utils/helper")
+const Review = require("../db/models/review")
+const {
+	topRatedMoviesPipeline,
+	getAverageRatings,
+	relatedMovieAggregation,
+	averageRatingPipeline,
+} = require("../utils/helper")
 
 // @desc Post trailer
 // @route POST /api/movie/trailer
@@ -372,7 +378,7 @@ const getMovies = asyncHandler(async (req, res) => {
 })
 
 // @desc Get movie by id
-// @route GET /api/movie/:movieId
+// @route GET /api/movie/getMovieById/:movieId
 // @access Public
 const getMovieById = asyncHandler(async (req, res) => {
 	const { movieId } = req.params
@@ -394,6 +400,8 @@ const getMovieById = asyncHandler(async (req, res) => {
 	delete movie.createdAt
 	delete movie.reviews
 	delete movie.poster.responsive
+
+	console.log("??")
 	res.status(200).json(movie)
 })
 
@@ -449,6 +457,106 @@ const getTopRatedMovies = asyncHandler(async (req, res) => {
 	res.json({ movies: topRatedMovies })
 })
 
+const getRelatedMovies = asyncHandler(async (req, res) => {
+	const { movieId } = req.params
+
+	if (!isValidObjectId(movieId)) {
+		res.status(400)
+		throw new Error("Invalid Movie Id")
+	}
+
+	const movie = await Movie.findById(movieId)
+
+	const movies = await Movie.aggregate(relatedMovieAggregation(movie.tags, movie._id))
+
+	const mapMovies = async m => {
+		const reviews = await getAverageRatings(m._id)
+
+		return {
+			id: m._id,
+			title: m.title,
+			poster: m.poster,
+			responsivePosters: m.responsivePosters,
+			reviews: { ...reviews },
+		}
+	}
+	const relatedMovies = await Promise.all(movies.map(mapMovies))
+
+	res.json({ movies: relatedMovies })
+})
+
+const getSingleMovie = asyncHandler(async (req, res) => {
+	const { movieId } = req.params
+
+	if (!isValidObjectId(movieId)) {
+		res.status(400)
+		throw new Error("Movie id is not valid!")
+	}
+
+	const movie = await Movie.findById(movieId).populate("director writers actors.id")
+
+	const [aggregatedResponse] = await Review.aggregate(averageRatingPipeline(movie._id))
+
+	const reviews = {}
+
+	if (aggregatedResponse) {
+		const { ratingAvg, reviewCount } = aggregatedResponse
+		reviews.ratingAvg = parseFloat(ratingAvg).toFixed(1)
+		reviews.reviewCount = reviewCount
+	}
+	console.log("review ", reviews)
+
+	const {
+		_id: id,
+		title,
+		storyLine,
+		actors,
+		writers,
+		director,
+		releaseDate,
+		genres,
+		tags,
+		language,
+		poster,
+		trailer,
+		type,
+	} = movie
+
+	res.status(200).json({
+		movie: {
+			id,
+			title,
+			storyLine,
+			releaseDate,
+			genres,
+			tags,
+			language,
+			type,
+			poster: poster?.url,
+			trailer: trailer?.url,
+			actors: actors.map(c => ({
+				id: c._id,
+				profile: {
+					id: c.id._id,
+					name: c.id.name,
+					avatar: c.id?.avatar?.url,
+				},
+				leadActor: c.leadActor,
+				roleAs: c.roleAs,
+			})),
+			writers: writers.map(w => ({
+				id: w._id,
+				name: w.name,
+			})),
+			director: {
+				id: director._id,
+				name: director.name,
+			},
+			reviews: { ...reviews },
+		},
+	})
+})
+
 module.exports = {
 	uploadTrailer,
 	createMovie,
@@ -459,4 +567,6 @@ module.exports = {
 	getMovieById,
 	getLatestMovies,
 	getTopRatedMovies,
+	getRelatedMovies,
+	getSingleMovie,
 }

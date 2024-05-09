@@ -10,7 +10,7 @@ const {
 
 const router = express.Router()
 
-router.route("/").get(getReviews).post(requireAuth, admin, createReview)
+router.route("/").get(getReviews).post(requireAuth, createReview)
 
 router
 	.route("/:reviewId")

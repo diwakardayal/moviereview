@@ -65,7 +65,7 @@ const averageRatingPipeline = movieId => {
 			},
 		},
 		{
-			$match: { parentMovie: movieId },
+			$match: { movieId },
 		},
 		{
 			$group: {
@@ -94,4 +94,39 @@ async function getAverageRatings(movieId) {
 	return reviews
 }
 
-module.exports = { parseData, topRatedMoviesPipeline, averageRatingPipeline, getAverageRatings }
+const relatedMovieAggregation = (tags, movieId) => {
+	return [
+		{
+			$lookup: {
+				from: "Movie",
+				localField: "tags",
+				foreignField: "_id",
+				as: "relatedMovies",
+			},
+		},
+		{
+			$match: {
+				tags: { $in: [...tags] },
+				_id: { $ne: movieId },
+			},
+		},
+		{
+			$project: {
+				title: 1,
+				poster: "$poster.url",
+				responsivePosters: "$poster.responsive",
+			},
+		},
+		{
+			$limit: 5,
+		},
+	]
+}
+
+module.exports = {
+	parseData,
+	topRatedMoviesPipeline,
+	averageRatingPipeline,
+	getAverageRatings,
+	relatedMovieAggregation,
+}

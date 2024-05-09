@@ -43,7 +43,7 @@ async function getMovieById(movieId) {
 	try {
 		const res = await axios.get(`/api/movie/getMovieById/${movieId}`)
 
-		return { res: res.data }
+		return { movie: res.data }
 	} catch (e) {
 		return { error: e }
 	}
@@ -90,9 +90,40 @@ async function getTopRatedMovies(type) {
 		if (type) endpoint = endpoint + "?type=" + type
 
 		const res = await axios.get(endpoint)
-		console.log("res  ", res)
 
 		return { movies: res?.data.movies }
+	} catch (e) {
+		console.log(e)
+		return { error: e?.response?.request?.statusText }
+	}
+}
+
+async function fetchMovieById(movieId) {
+	try {
+		const res = await axios.get(`/api/movie/getMovieById/${movieId}`)
+
+		return { movie: res?.data }
+	} catch (e) {
+		console.log(e)
+		return { error: e?.response?.request?.statusText }
+	}
+}
+
+async function getRelatedMovies(id) {
+	try {
+		const res = await axios.get("/api/movie/related/" + id)
+
+		return { movies: res?.data.movies }
+	} catch (e) {
+		console.log(e)
+		return { error: e?.response?.request?.statusText }
+	}
+}
+async function getSingleMovie(id) {
+	try {
+		const res = await axios.get("/api/movie/single/" + id)
+
+		return { movie: res?.data.movie }
 	} catch (e) {
 		console.log(e)
 		return { error: e?.response?.request?.statusText }
@@ -108,4 +139,7 @@ export {
 	deleteMovie,
 	getLatestUploads,
 	getTopRatedMovies,
+	fetchMovieById,
+	getRelatedMovies,
+	getSingleMovie,
 }
