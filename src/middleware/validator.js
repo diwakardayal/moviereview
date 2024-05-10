@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-restricted-syntax */
-const { check, validationResult } = require("express-validator")
+const { check } = require("express-validator")
 const { isValidObjectId } = require("mongoose")
 const genres = require("../db/genres")
 

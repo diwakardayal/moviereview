@@ -2,7 +2,7 @@
 	"name": "moviereview",
 	"version": "1.0.0",
 	"description": "",
-	"main": "index.js",
+	"main": "src/app.js",
 	"engines": {
 		"npm": "9.6.7",
 		"node": ">=18.0.0"
@@ -11,7 +11,7 @@
 		"start": "node src/app.js",
 		"format": "prettier --check",
 		"lint": "eslint \"**/*.js\" --quiet",
-		"build": "npx husky install && npm install && cd frontend && npm install && npm run build"
+		"build": "npx husky install && npm install && npm install --prefix frontend && npm run build --prefix frontend"
 	},
 	"lint-staged": {
 		"*": "npm run format",
